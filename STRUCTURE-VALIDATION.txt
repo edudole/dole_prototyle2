@@ -1,0 +1,15 @@
+LP360 CENTRAL CONFIG / STORAGE ISOLATION VALIDATION
+Date: 2026-09-30
+
+HTML pages checked: 81
+JavaScript syntax: checked separately with node --check
+Central MAIN+PROFILE endpoints in sites-config.js: 6
+Validation issues: 0
+
+Structure:
+- /index.html = district
+- /tambon1/index.html = tambon template/site 1
+- /tambon2 and /tambon3 = empty placeholders (.gitkeep)
+- /library/index.html = library
+- /sites-config.js = central MAIN + Student Profile /exec config
+- /site-bootstrap.js = per-site localStorage/sessionStorage namespace isolation
