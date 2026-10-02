@@ -1,0 +1,21 @@
+MOBILE NAV SHEET DROPDOWN FIX - 2026-10-03
+
+เป้าหมาย:
+- ปุ่ม submenu ใน mobileBottomNav สำหรับ ศกร.ระดับแขวง/สกร.ระดับตำบล และ ห้องสมุด ทำงานเหมือน main-nav-dropdown-toggle บนหัวเว็บ
+- เมื่อกด ให้ใช้ dropdown ตัวจริงบนหัวเว็บ และแสดงรายการล่าสุดที่ render จากชีต
+
+ไฟล์ที่แก้:
+- /index.html
+- /mobile-bottom-nav.js
+- /tambon1/index.html
+- /tambon1/mobile-bottom-nav.js
+- /library/index.html
+- /library/mobile-bottom-nav.js
+
+รายละเอียด:
+1. mobile submenu click จะ trigger ปุ่ม main-nav-dropdown-toggle ตัวจริงก่อน
+2. อ่านชื่อเมนูล่าสุดจากปุ่ม desktop ทุกครั้ง (รองรับชื่อที่ถูกเปลี่ยนจากชีต เช่น ศกร.ระดับแขวง)
+3. อ่านรายการ <a> ล่าสุดจาก #districtMenuList / #libraryMenuList ทุกครั้งที่กด
+4. ถ้ายังโหลดข้อมูล จะแสดงสถานะเดียวกับ desktop และ MutationObserver จะอัปเดตเมื่อข้อมูลจากชีตเข้ามา
+5. เมนูเพิ่มเติม/แฮมเบอร์เกอร์ใช้ชื่อ submenu ล่าสุด ไม่ใช้ชื่อที่จำตอนเริ่มโหลด
+6. ไม่แก้ sites-config.js, Apps Script, API URL หรือ business logic อื่น

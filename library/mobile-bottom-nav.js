@@ -100,6 +100,29 @@
     return item.source?.querySelector?.(':scope > .main-nav-dropdown-menu') || null;
   }
 
+  function resolveDesktopDropdown(item) {
+    if (!item) return null;
+
+    const menu = resolveSubmenuMenu(item);
+    if (menu) return menu.closest('.main-nav-dropdown');
+
+    const desktopNav = document.querySelector('.site-header .main-nav');
+    if (desktopNav && Number.isInteger(item.desktopIndex)) {
+      return desktopNav.children[item.desktopIndex] || null;
+    }
+
+    return item.source || null;
+  }
+
+  function resolveDesktopToggle(item) {
+    return resolveDesktopDropdown(item)?.querySelector?.(':scope > .main-nav-dropdown-toggle') || null;
+  }
+
+  function liveSubmenuLabel(item) {
+    const toggle = resolveDesktopToggle(item);
+    return cleanLabel(toggle?.textContent || item?.label || 'เมนู');
+  }
+
   function submenuItems(item) {
     const menu = resolveSubmenuMenu(item);
     if (!menu) return [];
@@ -109,6 +132,25 @@
       target: link.getAttribute('target') || '',
       rel: link.getAttribute('rel') || ''
     })).filter(row => row.label && row.href);
+  }
+
+  function submenuStatus(item) {
+    const menu = resolveSubmenuMenu(item);
+    if (!menu) return 'กำลังโหลดหรือยังไม่มีข้อมูล';
+    const status = menu.querySelector('.main-nav-dropdown-status');
+    return cleanLabel(status?.textContent) || 'กำลังโหลดหรือยังไม่มีข้อมูล';
+  }
+
+  function mirrorDesktopDropdownOpen(item) {
+    const dropdown = resolveDesktopDropdown(item);
+    const toggle = resolveDesktopToggle(item);
+    if (!dropdown || !toggle) return;
+
+    // ใช้ click ของปุ่มบนหัวเว็บจริง เพื่อให้ mobile มีพฤติกรรมเดียวกับ main-nav-dropdown-toggle
+    // รวมถึง logic ใด ๆ ที่ระบบอาจผูกเพิ่มกับปุ่ม desktop ในอนาคต
+    if (!dropdown.classList.contains('is-open')) {
+      toggle.click();
+    }
   }
 
   function makeMobileItem(item) {
@@ -188,7 +230,7 @@
     if (!rows.length) {
       const empty = document.createElement('div');
       empty.className = 'mobile-bottom-panel-empty';
-      empty.textContent = 'กำลังโหลดหรือยังไม่มีข้อมูล';
+      empty.textContent = options.emptyText || 'กำลังโหลดหรือยังไม่มีข้อมูล';
       panelBody.appendChild(empty);
     } else {
       rows.forEach(row => {
@@ -222,18 +264,29 @@
     moreButton?.setAttribute('aria-expanded', 'false');
     if (trigger) trigger.setAttribute('aria-expanded', 'true');
 
+    // ให้ปุ่ม mobile ทำงานผ่าน toggle ตัวจริงของเมนูด้านบนก่อน
+    mirrorDesktopDropdownOpen(item);
+
     const rows = submenuItems(item).map(row => ({
       ...row,
       type: 'link',
       icon: 'fa-solid fa-angle-right'
     }));
-    renderPanel(item.label, rows, { back: fromOverflow });
+
+    renderPanel(liveSubmenuLabel(item), rows, {
+      back: fromOverflow,
+      emptyText: submenuStatus(item)
+    });
   }
 
   function openOverflow() {
     const rows = mobileItems
       .filter(item => item.classList.contains('mobile-bottom-overflowed') && !item.hidden)
-      .map(item => item._mobileMenuDefinition)
+      .map(item => {
+        const def = item._mobileMenuDefinition;
+        if (!def) return null;
+        return def.type === 'submenu' ? { ...def, label: liveSubmenuLabel(def) } : def;
+      })
       .filter(Boolean);
 
     mobileItems.forEach(item => item.setAttribute('aria-expanded', 'false'));
@@ -358,8 +411,11 @@
         const title = cleanLabel(panelTitle?.textContent || '');
         const current = mobileItems
           .map(node => node._mobileMenuDefinition)
-          .find(def => def?.type === 'submenu' && cleanLabel(def.label) === title);
-        if (current) openSubmenu(current, null, false);
+          .find(def => def?.type === 'submenu' && liveSubmenuLabel(def) === title);
+        if (current) {
+          const hasBackButton = !!panelBody?.querySelector('.mobile-bottom-panel-row .fa-arrow-left');
+          openSubmenu(current, null, hasBackButton);
+        }
       }
     });
 
