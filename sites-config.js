@@ -19,14 +19,14 @@
     }),
     tambon2: Object.freeze({
       SITE_TYPE: 'TAMBOL',
-      MAIN_EXEC_URL: 'https://script.google.com/macros/s/AKfycbyXrG7HZVrpflXKo-rr4jf2Ez79NqWpSEgh6bBD0OXSrk5oX9_SWl4CatDBFX5gS8c-RA/exec',
-      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycbzdAKhonGUj6_kCjxqaFC-C-ZpDWx1BDNLYB5Rr_PdnNgeNYshkUTu9dL7LP24Uu1PQlg/exec',
+      MAIN_EXEC_URL: '',
+      STUDENT_PROFILE_EXEC_URL: '',
       CACHE_PREFIX: 'LP360:TAMBOL:TAMBON2:'
     }),
     tambon3: Object.freeze({
       SITE_TYPE: 'TAMBOL',
-      MAIN_EXEC_URL: 'https://script.google.com/macros/s/AKfycby4zrYBs2oTyzy_NdWxRimVFTEJUdvb6_TclonS4MlFLlVqmOdaYFucnVnXV3FaFPQs_A/exec',
-      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycbwptlgqNH1jg2NjwyeumhD6Mdtyx7niQo6L8wI8H_fMbbyflNx4IHbFwwGg8Su6VIlbPg/exec',
+      MAIN_EXEC_URL: '',
+      STUDENT_PROFILE_EXEC_URL: '',
       CACHE_PREFIX: 'LP360:TAMBOL:TAMBON3:'
     }),
     library: Object.freeze({
