@@ -64,12 +64,15 @@
         const toggle = node.querySelector(':scope > .main-nav-dropdown-toggle');
         if (!toggle) return null;
         const label = cleanLabel(toggle.textContent);
+        const menu = node.querySelector(':scope > .main-nav-dropdown-menu');
         return {
           key: `dropdown-${index}`,
           type: 'submenu',
           label,
           icon: iconFor(label),
-          source: node
+          source: node,
+          submenuId: menu?.id || '',
+          desktopIndex: index
         };
       }
 
@@ -77,16 +80,35 @@
     }).filter(Boolean);
   }
 
-  function submenuItems(source) {
-    if (!source) return [];
-    const menu = source.querySelector(':scope > .main-nav-dropdown-menu');
+  function resolveSubmenuMenu(item) {
+    if (!item) return null;
+
+    // เมนู สกร.ระดับตำบล/ห้องสมุด ถูกเติมข้อมูลแบบ dynamic หลังหน้าเริ่มโหลด
+    // จึงต้องหา element ปัจจุบันใหม่ทุกครั้ง แทนการพึ่ง DOM reference ตอนเริ่มต้นเพียงครั้งเดียว
+    if (item.submenuId) {
+      const byId = document.getElementById(item.submenuId);
+      if (byId) return byId;
+    }
+
+    const desktopNav = document.querySelector('.site-header .main-nav');
+    if (desktopNav && Number.isInteger(item.desktopIndex)) {
+      const currentNode = desktopNav.children[item.desktopIndex];
+      const currentMenu = currentNode?.querySelector?.(':scope > .main-nav-dropdown-menu');
+      if (currentMenu) return currentMenu;
+    }
+
+    return item.source?.querySelector?.(':scope > .main-nav-dropdown-menu') || null;
+  }
+
+  function submenuItems(item) {
+    const menu = resolveSubmenuMenu(item);
     if (!menu) return [];
     return Array.from(menu.querySelectorAll('a[href]')).map(link => ({
       label: cleanLabel(link.textContent),
       href: link.getAttribute('href') || link.href,
       target: link.getAttribute('target') || '',
       rel: link.getAttribute('rel') || ''
-    })).filter(item => item.label && item.href);
+    })).filter(row => row.label && row.href);
   }
 
   function makeMobileItem(item) {
@@ -200,7 +222,7 @@
     moreButton?.setAttribute('aria-expanded', 'false');
     if (trigger) trigger.setAttribute('aria-expanded', 'true');
 
-    const rows = submenuItems(item.source).map(row => ({
+    const rows = submenuItems(item).map(row => ({
       ...row,
       type: 'link',
       icon: 'fa-solid fa-angle-right'
@@ -312,11 +334,36 @@
   function bindDesktopMenuObserver() {
     const desktopNav = document.querySelector('.site-header .main-nav');
     if (!desktopNav) return;
+
     const observer = new MutationObserver(records => {
-      const structuralChange = records.some(record => record.type === 'childList' && record.target === desktopNav);
-      if (structuralChange) buildFromMainNav();
+      const topLevelChanged = records.some(record =>
+        record.type === 'childList' && record.target === desktopNav
+      );
+
+      // รายการ สกร.ระดับตำบล/ห้องสมุด ถูก render ภายหลังด้วย innerHTML
+      // ไม่ rebuild mobile nav ทั้งชุดเพื่อไม่ให้ panel กระพริบ แต่ถ้า submenu ที่เปิดอยู่
+      // เปลี่ยนข้อมูล ให้ render รายการล่าสุดทันที
+      const submenuChanged = records.some(record =>
+        record.type === 'childList' &&
+        record.target instanceof Element &&
+        record.target.classList.contains('main-nav-dropdown-menu')
+      );
+
+      if (topLevelChanged) {
+        buildFromMainNav();
+        return;
+      }
+
+      if (submenuChanged && panel && !panel.hidden) {
+        const title = cleanLabel(panelTitle?.textContent || '');
+        const current = mobileItems
+          .map(node => node._mobileMenuDefinition)
+          .find(def => def?.type === 'submenu' && cleanLabel(def.label) === title);
+        if (current) openSubmenu(current, null, false);
+      }
     });
-    observer.observe(desktopNav, { childList: true });
+
+    observer.observe(desktopNav, { childList: true, subtree: true });
   }
 
   function init() {
