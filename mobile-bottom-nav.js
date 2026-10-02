@@ -83,8 +83,19 @@
   function resolveSubmenuMenu(item) {
     if (!item) return null;
 
-    // เมนู สกร.ระดับตำบล/ห้องสมุด ถูกเติมข้อมูลแบบ dynamic หลังหน้าเริ่มโหลด
-    // จึงต้องหา element ปัจจุบันใหม่ทุกครั้ง แทนการพึ่ง DOM reference ตอนเริ่มต้นเพียงครั้งเดียว
+    // เมนู ศกร./สกร.ระดับตำบล/แขวง และ ห้องสมุด ต้องใช้รายการชุดเดียวกับ
+    // #districtMenuList / #libraryMenuList ที่ render จากชีตโดยตรง
+    // เพื่อไม่ให้ mobileBottomNav มีข้อมูลคนละชุดกับเมนูหัวเว็บไซต์
+    const liveLabel = cleanLabel(item.label || '');
+    if (/ห้องสมุด/i.test(liveLabel)) {
+      const libraryMenu = document.getElementById('libraryMenuList');
+      if (libraryMenu) return libraryMenu;
+    }
+    if (/ศกร|สกร|ตำบล|แขวง|ศศช/i.test(liveLabel)) {
+      const districtMenu = document.getElementById('districtMenuList');
+      if (districtMenu) return districtMenu;
+    }
+
     if (item.submenuId) {
       const byId = document.getElementById(item.submenuId);
       if (byId) return byId;
@@ -126,7 +137,10 @@
   function submenuItems(item) {
     const menu = resolveSubmenuMenu(item);
     if (!menu) return [];
-    return Array.from(menu.querySelectorAll('a[href]')).map(link => ({
+
+    // อ่าน <a> จาก div ตัวจริงทุกครั้งที่กด เพื่อให้รายการที่ render จากชีตล่าสุด
+    // ใน #districtMenuList / #libraryMenuList แสดงใน mobile submenu ทันที
+    return Array.from(menu.querySelectorAll(':scope > a[href], a[href]')).map(link => ({
       label: cleanLabel(link.textContent),
       href: link.getAttribute('href') || link.href,
       target: link.getAttribute('target') || '',
@@ -141,16 +155,21 @@
     return cleanLabel(status?.textContent) || 'กำลังโหลดหรือยังไม่มีข้อมูล';
   }
 
+  function isSheetDrivenSubmenu(item) {
+    const label = cleanLabel(resolveDesktopToggle(item)?.textContent || item?.label || '');
+    return /ห้องสมุด|ศกร|สกร|ตำบล|แขวง|ศศช/i.test(label);
+  }
+
   function mirrorDesktopDropdownOpen(item) {
+    // districtMenuList / libraryMenuList มีข้อมูลจากชีตอยู่ใน DOM อยู่แล้ว
+    // สำหรับ 2 เมนูนี้ mobile อ่าน DOM ชุดเดียวกันโดยตรง ไม่ click ปุ่ม desktop
+    // เพื่อป้องกัน event ของ desktop ไปปิด/สลับสถานะ panel ของ mobile
+    if (isSheetDrivenSubmenu(item)) return;
+
     const dropdown = resolveDesktopDropdown(item);
     const toggle = resolveDesktopToggle(item);
     if (!dropdown || !toggle) return;
-
-    // ใช้ click ของปุ่มบนหัวเว็บจริง เพื่อให้ mobile มีพฤติกรรมเดียวกับ main-nav-dropdown-toggle
-    // รวมถึง logic ใด ๆ ที่ระบบอาจผูกเพิ่มกับปุ่ม desktop ในอนาคต
-    if (!dropdown.classList.contains('is-open')) {
-      toggle.click();
-    }
+    if (!dropdown.classList.contains('is-open')) toggle.click();
   }
 
   function makeMobileItem(item) {

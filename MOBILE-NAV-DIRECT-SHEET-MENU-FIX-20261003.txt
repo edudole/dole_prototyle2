@@ -1,0 +1,17 @@
+MOBILE NAV DIRECT SHEET MENU FIX — 2026-10-03
+
+แก้ปุ่ม mobileBottomNav:
+- ศกร./สกร.ระดับตำบล/แขวง อ่านรายการจาก #districtMenuList โดยตรง
+- ห้องสมุด อ่านรายการจาก #libraryMenuList โดยตรง
+- อ่าน <a> ล่าสุดทุกครั้งที่กด หลังข้อมูลถูก render จากชีต
+- ไม่ trigger click ของ desktop toggle สำหรับ 2 เมนูนี้ เพื่อป้องกัน event ชนกับ mobile panel
+
+ไฟล์แก้:
+- /mobile-bottom-nav.js
+- /index.html
+- /tambon1/mobile-bottom-nav.js
+- /tambon1/index.html
+- /library/mobile-bottom-nav.js
+- /library/index.html
+
+ไม่แก้ Apps Script / sites-config.js / app-config.js
