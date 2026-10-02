@@ -134,13 +134,24 @@
     return cleanLabel(toggle?.textContent || item?.label || 'เมนู');
   }
 
+  function sheetSubmenuTargetId(item) {
+    if (!item) return '';
+    if (item.submenuId === 'districtMenuList' || item.submenuId === 'libraryMenuList') return item.submenuId;
+
+    const label = cleanLabel(liveSubmenuLabel(item) || item.label || '');
+    if (/ห้องสมุด/i.test(label)) return 'libraryMenuList';
+    if (/ศกร|สกร|ตำบล|แขวง|ศศช/i.test(label)) return 'districtMenuList';
+    return '';
+  }
+
   function submenuItems(item) {
-    const menu = resolveSubmenuMenu(item);
+    const targetId = sheetSubmenuTargetId(item);
+    const menu = targetId ? document.getElementById(targetId) : resolveSubmenuMenu(item);
     if (!menu) return [];
 
-    // อ่าน <a> จาก div ตัวจริงทุกครั้งที่กด เพื่อให้รายการที่ render จากชีตล่าสุด
-    // ใน #districtMenuList / #libraryMenuList แสดงใน mobile submenu ทันที
-    return Array.from(menu.querySelectorAll(':scope > a[href], a[href]')).map(link => ({
+    // อ่าน link จาก DOM ตัวจริงทุกครั้งที่กด โดยเฉพาะ districtMenuList/libraryMenuList
+    // ซึ่งถูก render จากข้อมูลชีตภายหลังการโหลดหน้า
+    return Array.from(menu.querySelectorAll('a[href]')).map(link => ({
       label: cleanLabel(link.textContent),
       href: link.getAttribute('href') || link.href,
       target: link.getAttribute('target') || '',
@@ -257,8 +268,10 @@
           const button = document.createElement('button');
           button.type = 'button';
           button.className = 'mobile-bottom-panel-row mobile-bottom-panel-submenu';
+          const targetId = sheetSubmenuTargetId(row);
+          if (targetId) button.dataset.mobileSubmenuTarget = targetId;
+          button._mobileSubmenuDefinition = row;
           button.innerHTML = `<i class="${row.icon}" aria-hidden="true"></i><span>${escapeHtml(row.label)}</span><i class="fa-solid fa-chevron-right mobile-bottom-panel-chevron" aria-hidden="true"></i>`;
-          button.addEventListener('click', () => openSubmenu(row, null, true));
           panelBody.appendChild(button);
           return;
         }
@@ -455,6 +468,19 @@
       else openOverflow();
     });
     document.getElementById('mobileBottomPanelClose')?.addEventListener('click', closePanel);
+
+    // ใช้ event delegation สำหรับปุ่ม submenu ในหน้าเมนูเพิ่มเติม
+    // เพื่อให้ปุ่ม ศกร.ระดับแขวง/ตำบล และ ห้องสมุด ผูกกับ #districtMenuList/#libraryMenuList โดยตรง
+    panelBody?.addEventListener('click', event => {
+      const button = event.target.closest('.mobile-bottom-panel-submenu');
+      if (!button || !panelBody.contains(button)) return;
+      event.preventDefault();
+      event.stopPropagation();
+
+      const def = button._mobileSubmenuDefinition;
+      if (!def) return;
+      openSubmenu(def, null, true);
+    });
 
     document.addEventListener('click', event => {
       if (!panel || panel.hidden || nav.contains(event.target)) return;
