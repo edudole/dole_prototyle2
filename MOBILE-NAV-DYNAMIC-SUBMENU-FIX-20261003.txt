@@ -1,0 +1,20 @@
+MOBILE BOTTOM NAV — DYNAMIC SUBMENU FIX 2026-10-03
+
+แก้ไขเว็บไซต์อำเภอ / tambon1 / library
+
+ปัญหา:
+- เมนูบนหัวเว็บ สกร.ระดับตำบล และ ห้องสมุด ถูกเติมรายการแบบ dynamic หลังหน้าเริ่มโหลด
+- mobileBottomNav รุ่นก่อนเก็บ DOM reference ตอนเริ่มต้น ทำให้บางสถานะเมนูแฮมเบอร์เกอร์เปิด submenu แล้วไม่พบรายการล่าสุด
+
+การแก้ไข:
+1. เก็บ submenuId และตำแหน่ง top-level ของ dropdown
+2. ทุกครั้งที่กด submenu จะ resolve DOM ปัจจุบันใหม่
+3. districtMenuList/libraryMenuList จึงอ่านรายการล่าสุดจากเมนูบนหัวเว็บโดยตรง
+4. MutationObserver เฝ้า childList แบบ subtree เพื่อรองรับรายการที่ render ภายหลัง
+5. เปลี่ยน cache-busting mobile-bottom-nav.js เป็น v=20261003-main-nav-sync-2
+
+ไฟล์ที่แก้ต่อเว็บไซต์:
+- index.html
+- mobile-bottom-nav.js
+
+ไม่แก้ Apps Script, sites-config.js, endpoint, CRUD, template, admin, cache namespace หรือฟังก์ชันอื่น
