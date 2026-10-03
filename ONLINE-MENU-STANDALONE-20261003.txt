@@ -1,0 +1,17 @@
+LP360 ONLINE MENU UPDATE - 2026-10-03
+
+ทุกเว็บไซต์:
+- ลบเมนู “บริการออนไลน์” ออกจาก site-header/main-nav
+- แสดง “หลักสูตรออนไลน์” เป็นเมนูเดี่ยว -> #cliproomBox
+- แสดง “อ่านหนังสือสะสมเวลา” เป็นเมนูเดี่ยว -> #readBookTimeBox
+- ทั้งสองรายการยังซ่อน/แสดงตาม data-section-visible/hidden ของ SECTION เป้าหมาย
+- “ช้อปกิจกรรม” ยังคงไม่เป็นเมนูเดี่ยว ตามคำสั่งก่อนหน้า
+- mobileBottomNav sync จาก main-nav ผ่าน lp360:main-nav-updated จึงแสดง/ซ่อนตามกัน
+
+ไฟล์ที่แก้:
+/index.html
+/main-nav-services.js
+/tambon1/index.html
+/tambon1/main-nav-services.js
+/library/index.html
+/library/main-nav-services.js

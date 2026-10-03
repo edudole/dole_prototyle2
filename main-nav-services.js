@@ -1,10 +1,9 @@
 (() => {
   'use strict';
 
-  const ONLINE = [
+  const STANDALONE_ONLINE = [
     { label: 'หลักสูตรออนไลน์', href: '#cliproomBox' },
-    { label: 'อ่านหนังสือสะสมเวลา', href: '#readBookTimeBox' },
-    { label: 'ช้อปกิจกรรม', href: '#learningBaseModule' }
+    { label: 'อ่านหนังสือสะสมเวลา', href: '#readBookTimeBox' }
   ];
 
   const EXCLUDED_SECTION_IDS = new Set(['studentBox', 'buttonsection']);
@@ -92,28 +91,13 @@
     a.hidden = !sectionVisibleByElement(section);
   }
 
-  function ensureOnlineDropdown(nav) {
-    // These sections must appear only inside “บริการออนไลน์”, not as standalone top-level links.
-    Array.from(nav.children).forEach(node => {
-      if (!node.matches?.('a[href]')) return;
-      const href = node.getAttribute('href');
-      if (ONLINE.some(item => item.href === href)) node.remove();
-    });
+  function ensureStandaloneOnlineLinks(nav) {
+    // Remove the old “บริการออนไลน์” dropdown if it still exists from an earlier build.
+    nav.querySelector('[data-lp360-nav="online-services"]')?.remove();
 
-    let box = nav.querySelector('[data-lp360-nav="online-services"]');
-    if (!box) {
-      box = document.createElement('div');
-      box.className = 'main-nav-dropdown';
-      box.dataset.lp360Nav = 'online-services';
-      box.innerHTML = '<button class="main-nav-dropdown-toggle" type="button" aria-expanded="false">บริการออนไลน์ <span aria-hidden="true">▾</span></button><div id="onlineServicesMenuList" class="main-nav-dropdown-menu" role="menu"></div>';
-      const student = nav.querySelector('[data-lp360-nav="student-services"]');
-      if (student) student.after(box); else nav.appendChild(box);
-    }
-
-    const menu = box.querySelector('#onlineServicesMenuList');
-    ONLINE.forEach(item => {
+    STANDALONE_ONLINE.forEach((item, index) => {
       const section = document.getElementById(item.href.slice(1));
-      let a = menu.querySelector(`a[href="${item.href}"]`);
+      let a = Array.from(nav.children).find(node => node.matches?.(`a[href="${item.href}"]`));
       if (!section) {
         a?.remove();
         return;
@@ -121,13 +105,19 @@
       if (!a) {
         a = document.createElement('a');
         a.href = item.href;
-        a.setAttribute('role', 'menuitem');
-        menu.appendChild(a);
+        a.dataset.lp360Nav = index === 0 ? 'online-course' : 'readbook-time';
+        const student = nav.querySelector('[data-lp360-nav="student-services"]');
+        const previous = index > 0 ? Array.from(nav.children).find(node => node.matches?.(`a[href="${STANDALONE_ONLINE[index - 1].href}"]`)) : null;
+        if (previous) previous.after(a);
+        else if (student) student.after(a);
+        else nav.appendChild(a);
       }
       a.textContent = item.label;
       a.hidden = !sectionVisibleByElement(section);
     });
-    box.hidden = !Array.from(menu.querySelectorAll('a[href]')).some(a => !a.hidden);
+
+    // “ช้อปกิจกรรม” stays out of the top-level menu.
+    removeStandaloneShopActivity(nav);
   }
 
   function syncExistingSectionLinks(nav) {
@@ -162,7 +152,7 @@
       const href = `#${section.id}`;
 
       // These are intentionally represented elsewhere.
-      if (ONLINE.some(item => item.href === href) || section.id === 'studentServicesBox' || EXCLUDED_SECTION_IDS.has(section.id)) return;
+      if (STANDALONE_ONLINE.some(item => item.href === href) || href === '#learningBaseModule' || section.id === 'studentServicesBox' || EXCLUDED_SECTION_IDS.has(section.id)) return;
 
       const existing = Array.from(nav.children).find(node => node.matches?.(`a[href="${href}"]`));
       if (existing) {
@@ -186,7 +176,7 @@
     removeExcludedShortcutLinks(nav);
     removeStandaloneShopActivity(nav);
     ensureStudentLink(nav);
-    ensureOnlineDropdown(nav);
+    ensureStandaloneOnlineLinks(nav);
     syncAutoSections(nav);
     syncExistingSectionLinks(nav);
     document.dispatchEvent(new CustomEvent('lp360:main-nav-updated'));
