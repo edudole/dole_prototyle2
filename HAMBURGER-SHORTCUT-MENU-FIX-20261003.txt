@@ -1,0 +1,21 @@
+LP360 HAMBURGER + SHORTCUT MENU FIX — 2026-10-03
+
+แก้ไขทุกเว็บไซต์: อำเภอ / tambon1 / library
+
+1) Hamburger / เมนูเพิ่มเติม
+- site-header desktop: ระหว่าง main-nav sync/reflow จะคง panel ที่ผู้ใช้เปิดอยู่ ไม่ปิดเอง
+- mobileBottomNav: ระหว่าง section visibility/main-nav sync จะคง panel เมนูเพิ่มเติม/submenu ที่เปิดอยู่
+- panel ยังคงปิดเมื่อเลือก link, กดปิด, กดนอก panel, กด Escape หรือเปลี่ยน viewport ตามเงื่อนไขเดิม
+
+2) ไม่แสดงรายการ เมนูลัด / ปุ่มทางลัด
+- ไม่สร้าง top-level nav สำหรับ #studentBox (เมนูลัด)
+- ไม่สร้าง top-level nav สำหรับ #buttonsection (ปุ่มทางลัด)
+- ถ้ามี link เดิมอยู่ใน main-nav จะถูกลบจากเมนู
+- mobileBottomNav อ่านจาก main-nav จึงไม่แสดงสองรายการนี้ด้วย
+- ไม่ได้ลบ SECTION หรือฟังก์ชันของ studentBox/buttonsection ออกจากหน้าเว็บ
+
+ไฟล์ที่แก้ต่อเว็บไซต์:
+- index.html
+- main-nav-services.js
+- desktop-nav-overflow.js
+- mobile-bottom-nav.js

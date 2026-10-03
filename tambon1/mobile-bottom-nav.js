@@ -229,6 +229,10 @@
   function buildFromMainNav() {
     if (!nav || !moreButton) return;
 
+    const panelWasOpen = !!(panel && !panel.hidden);
+    const panelWasOverflow = panelWasOpen && cleanLabel(panelTitle?.textContent || '') === 'เมนูเพิ่มเติม';
+    const openPanelTitle = panelWasOpen ? cleanLabel(panelTitle?.textContent || '') : '';
+
     nav.querySelectorAll('[data-mobile-bottom-item]').forEach(node => node.remove());
 
     const definitions = [{
@@ -243,6 +247,19 @@
     bindSectionObserver();
     fitItems();
     setActiveByHref(activeHref);
+
+    // Dynamic main-nav updates happen while sheet/section data loads. Preserve the user's open panel.
+    if (panelWasOpen) {
+      if (panelWasOverflow) {
+        openOverflow();
+      } else if (openPanelTitle) {
+        const def = mobileItems
+          .map(node => node._mobileMenuDefinition)
+          .find(item => item?.type === 'submenu' && liveSubmenuLabel(item) === openPanelTitle);
+        if (def) openSubmenu(def, null, false);
+        else openOverflow();
+      }
+    }
   }
 
   function closePanel() {
@@ -358,7 +375,8 @@
       if (!visible) item.setAttribute('tabindex', '-1');
       else item.removeAttribute('tabindex');
     });
-    if (panel && !panel.hidden) closePanel();
+    // Keep an open hamburger/submenu panel open while section visibility is recalculated.
+    // Repeated dynamic section updates must not dismiss 'เมนูเพิ่มเติม'.
     fitItems();
   }
 

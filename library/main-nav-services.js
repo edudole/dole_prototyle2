@@ -7,6 +7,8 @@
     { label: 'ช้อปกิจกรรม', href: '#learningBaseModule' }
   ];
 
+  const EXCLUDED_SECTION_IDS = new Set(['studentBox', 'buttonsection']);
+
   const KNOWN_SECTION_LABELS = Object.freeze({
     news: 'ข่าวสาร',
     studentBox: 'เมนูลัด',
@@ -53,6 +55,16 @@
     if (aria) return aria;
 
     return KNOWN_SECTION_LABELS[section.id] || section.id;
+  }
+
+  function removeExcludedShortcutLinks(nav) {
+    Array.from(nav.children).forEach(node => {
+      if (!node.matches?.('a[href^="#"]')) return;
+      const href = node.getAttribute('href') || '';
+      const id = href.startsWith('#') ? href.slice(1) : '';
+      const label = cleanLabel(node.textContent || '');
+      if (EXCLUDED_SECTION_IDS.has(id) || /^(เมนูลัด|ปุ่มทางลัด)$/i.test(label)) node.remove();
+    });
   }
 
   function removeStandaloneShopActivity(nav) {
@@ -150,7 +162,7 @@
       const href = `#${section.id}`;
 
       // These are intentionally represented elsewhere.
-      if (ONLINE.some(item => item.href === href) || section.id === 'studentServicesBox') return;
+      if (ONLINE.some(item => item.href === href) || section.id === 'studentServicesBox' || EXCLUDED_SECTION_IDS.has(section.id)) return;
 
       const existing = Array.from(nav.children).find(node => node.matches?.(`a[href="${href}"]`));
       if (existing) {
@@ -171,6 +183,7 @@
   function sync() {
     const nav = document.querySelector('.site-header .main-nav');
     if (!nav) return;
+    removeExcludedShortcutLinks(nav);
     removeStandaloneShopActivity(nav);
     ensureStudentLink(nav);
     ensureOnlineDropdown(nav);

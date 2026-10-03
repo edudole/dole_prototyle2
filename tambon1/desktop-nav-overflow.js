@@ -107,10 +107,12 @@
     measuring=true;
     try{
       const box=ensureOverflow(wrap,nav);
+      const panel=box.querySelector('.desktop-nav-overflow-panel');
+      const btn=box.querySelector('.desktop-nav-overflow-toggle');
+      const wasOpen=!!(panel && !panel.hidden && btn?.getAttribute('aria-expanded')==='true');
       Array.from(nav.children).forEach(el=>el.classList.remove('lp-desktop-overflow-hidden'));
       box.hidden=true;
-      closeOverflow();
-      if(!isDesktop()) return;
+      if(!isDesktop()) { closeOverflow(); return; }
       const candidates=visibleOriginals(nav);
       if(!candidates.length) return;
       // First test with the full nav. A tiny tolerance avoids rounding-only overflow.
@@ -120,10 +122,10 @@
       for(let i=candidates.length-1;i>=0 && nav.scrollWidth>nav.clientWidth+2;i--){
         candidates[i].classList.add('lp-desktop-overflow-hidden');
       }
-      const panel=box.querySelector('.desktop-nav-overflow-panel');
       rebuildPanel(nav,panel);
+      if(wasOpen && !box.hidden && panel && btn){ panel.hidden=false; btn.setAttribute('aria-expanded','true'); }
       // If nothing ended up hidden, the button is unnecessary.
-      if(!nav.querySelector('.lp-desktop-overflow-hidden')) box.hidden=true;
+      if(!nav.querySelector('.lp-desktop-overflow-hidden')) { box.hidden=true; closeOverflow(); }
     } finally { measuring=false; }
   }
 
