@@ -7,8 +7,8 @@
   const SITES = Object.freeze({
     district: Object.freeze({
       SITE_TYPE: 'DISTRICT',
-      MAIN_EXEC_URL: 'https://script.google.com/macros/s/AKfycbzGOcbm-5oerlRH5T0z_HPn-wddQVySLeUqL29zObB8LcHmFTW7L101G3zxX_ucfX-y/exec',
-      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycbzKjAvy0NQXPI0vG-BkeAu1tmYEaooUHabIQUfwZ2Hn00prrOfCtLWHz6QewWA6qVPqgw/exec',
+      MAIN_EXEC_URL: 'https://script.google.com/macros/s/AKfycbyGRs8U6Y_90v4vp-b89DbPys6XdK10wNfk6wr9GlOodS56eCmt9mRAQaor06sPXSyw/exec',
+      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycbxRKggOqUnVELn9bzGp8CJq445aMjMjsLGb_QA9TlO-IQQ3v9-iduafBZYGAOWZY6MWMg/exec',
       CACHE_PREFIX: 'LP360:DISTRICT:ROOT:'
     }),
     tambon1: Object.freeze({
