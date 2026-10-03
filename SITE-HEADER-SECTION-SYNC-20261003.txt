@@ -1,0 +1,17 @@
+LP360 SITE HEADER + SECTION SYNC UPDATE - 2026-10-03
+
+ทุกเว็บไซต์ (อำเภอ / tambon1 / library)
+1. ลบเมนูช้อปกิจกรรมที่เป็น top-level ออกจาก site-header; คงไว้ในบริการออนไลน์เท่านั้น
+2. main-nav-services.js ซิงก์ SECTION ใน <main> กับ main-nav อัตโนมัติ
+   - ชื่อ: data-nav-label > data-online-service-label > aria-labelledby > h1/h2/h3 > aria-label > known label > section id
+   - เพิ่ม SECTION ใหม่ -> เพิ่มเมนูอัตโนมัติ
+   - ลบ SECTION -> ลบเมนู auto ที่เกี่ยวข้อง
+   - Section ที่ซ่อน data-section-visible=false/hidden -> ซ่อนเมนู
+   - online sections (หลักสูตร/อ่านหนังสือ/ช้อปกิจกรรม) อยู่ในบริการออนไลน์เท่านั้น
+   - studentServicesBox ใช้เมนูบริการนักศึกษา
+3. mobileBottomNav อ่าน main-nav อยู่แล้ว จึงซิงก์ตามรายการ SECTION อัตโนมัติ
+4. site-header brand name:
+   - Desktop >1024px: ซ่อน
+   - Smartphone/Tablet <=1024px: แสดง
+5. คงระบบ desktop overflow hamburger เดิมไว้
+6. MutationObserver เฝ้าเฉพาะโครงสร้าง/attribute ที่จำเป็นเพื่อลดภาระระหว่างโหลดหน้า

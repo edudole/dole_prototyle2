@@ -1,13 +1,16 @@
 /* LP360 site-header responsive/theme + desktop overflow - 2026-10-03 */
-/* Brand name inside site-header is hidden on every device. Logo/icon remains. */
+/* Desktop: hide brand name in site-header. Mobile/tablet: show it. */
 .site-header [data-website-brand-name]{display:none!important;visibility:hidden!important}
 .site-header .nav-wrap>.brand{min-width:0!important;max-width:none!important}
 
-/* Mobile/tablet: do not paint a white layer over the selected Template/theme. */
+/* Mobile/tablet: preserve selected Template/theme and show website brand name. */
 @media (max-width:1024px){
   .site-header .nav-wrap,
   .site-header .container.nav-wrap{background:transparent!important}
-  .site-header .nav-wrap>.brand [data-website-brand-name]{display:none!important}
+  .site-header .nav-wrap>.brand [data-website-brand-name]{
+    display:inline!important;visibility:visible!important;opacity:1!important;
+    max-width:min(58vw,420px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+  }
 }
 
 /* Desktop overflow menu. It appears only when the real main-nav no longer fits. */
