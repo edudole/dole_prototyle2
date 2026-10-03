@@ -2,6 +2,12 @@ name: Update LINE SEO from Google Sheet
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'sites-config.js'
+      - 'tools/update-seo.mjs'
+      - '.github/workflows/update-line-seo.yml'
   schedule:
     - cron: '17,47 * * * *'
 
@@ -15,9 +21,15 @@ concurrency:
 jobs:
   update-seo:
     runs-on: ubuntu-latest
+    env:
+      # ถ้าต้องการใช้ Custom Domain ให้สร้าง Repository variable ชื่อ SEO_PUBLIC_BASE_URL
+      # หากไม่กำหนด จะใช้ https://OWNER.github.io/REPOSITORY/ อัตโนมัติ
+      SEO_PUBLIC_BASE_URL: ${{ vars.SEO_PUBLIC_BASE_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -26,6 +38,20 @@ jobs:
 
       - name: Read T3/T4 and write static SEO
         run: node tools/update-seo.mjs
+
+      - name: Verify LINE SEO is static in HTML
+        shell: bash
+        run: |
+          set -e
+          files=(index.html)
+          for d in tambon* library; do
+            if [ -f "$d/index.html" ]; then files+=("$d/index.html"); fi
+          done
+          for f in "${files[@]}"; do
+            grep -Eq '<title>[^<]+</title>' "$f" || { echo "ERROR: $f title ว่าง"; exit 1; }
+            grep -Eq '<meta property="og:title" content="[^"]+"' "$f" || { echo "ERROR: $f ไม่มี og:title"; exit 1; }
+            grep -Eq '<meta property="og:description" content="[^"]+"' "$f" || { echo "ERROR: $f ไม่มี og:description"; exit 1; }
+          done
 
       - name: Commit updated SEO
         shell: bash
@@ -36,6 +62,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html '*/index.html'
-          git commit -m "chore: update LINE/OG SEO from Google Sheet"
+          git add index.html 'tambon*/index.html' 'library/index.html'
+          git commit -m "chore: update LINE/OG SEO from Google Sheet [skip ci]"
           git push
