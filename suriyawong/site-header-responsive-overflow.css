@@ -1,0 +1,50 @@
+/* LP360 site-header responsive/theme + desktop overflow - 2026-10-03 */
+/* Desktop: hide brand name in site-header. Mobile/tablet: show it. */
+.site-header [data-website-brand-name]{display:none!important;visibility:hidden!important}
+.site-header .nav-wrap>.brand{min-width:0!important;max-width:none!important}
+
+/* Mobile/tablet: preserve selected Template/theme and show website brand name. */
+@media (max-width:1024px){
+  .site-header .nav-wrap,
+  .site-header .container.nav-wrap{background:transparent!important}
+  .site-header .nav-wrap>.brand [data-website-brand-name]{
+    display:inline!important;visibility:visible!important;opacity:1!important;
+    max-width:min(58vw,420px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+  }
+}
+
+/* Desktop overflow menu. It appears only when the real main-nav no longer fits. */
+@media (min-width:1025px){
+  .site-header .nav-wrap{min-width:0}
+  .site-header .main-nav{min-width:0;overflow:visible;white-space:nowrap}
+  .site-header .main-nav>.lp-desktop-overflow-hidden{display:none!important}
+  .desktop-nav-overflow{position:relative;flex:0 0 auto;margin-left:8px;z-index:650}
+  .desktop-nav-overflow[hidden]{display:none!important}
+  .desktop-nav-overflow-toggle{
+    width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid currentColor;border-radius:10px;background:transparent;color:inherit;
+    cursor:pointer;font:inherit;opacity:.92
+  }
+  .desktop-nav-overflow-toggle:hover,.desktop-nav-overflow-toggle:focus-visible{background:rgba(127,127,127,.12);outline:none}
+  .desktop-nav-overflow-panel{
+    position:absolute;right:0;top:calc(100% + 10px);width:min(330px,calc(100vw - 32px));
+    max-height:min(70vh,620px);overflow:auto;padding:8px;border:1px solid #e5e7eb;
+    border-radius:14px;background:#fff;color:#26324d;box-shadow:0 16px 38px rgba(15,23,42,.22);
+    display:grid;gap:3px;z-index:9999
+  }
+  .desktop-nav-overflow-panel[hidden]{display:none!important}
+  .desktop-nav-overflow-panel>a,.desktop-nav-overflow-row{
+    width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;
+    gap:10px;padding:10px 12px;border:0;border-radius:9px;background:transparent;color:#26324d;
+    text-decoration:none;text-align:left;font:inherit;font-size:14px;line-height:1.35;cursor:pointer
+  }
+  .desktop-nav-overflow-panel>a:hover,.desktop-nav-overflow-row:hover,
+  .desktop-nav-overflow-panel>a:focus-visible,.desktop-nav-overflow-row:focus-visible{background:#eff6ff;color:#1d4ed8;outline:none}
+  .desktop-nav-overflow-submenu{display:grid;gap:2px;padding:2px 0 7px 14px}
+  .desktop-nav-overflow-submenu[hidden]{display:none!important}
+  .desktop-nav-overflow-submenu>a{display:block;padding:9px 12px;border-radius:8px;color:#26324d;text-decoration:none;font-size:13px;line-height:1.35;white-space:normal}
+  .desktop-nav-overflow-submenu>a:hover,.desktop-nav-overflow-submenu>a:focus-visible{background:#eff6ff;color:#1d4ed8;outline:none}
+  .desktop-nav-overflow-empty{padding:9px 12px;color:#94a3b8;font-size:13px;text-align:center}
+  body.lp-color-themed .desktop-nav-overflow-toggle{color:#fff;border-color:rgba(255,255,255,.65)}
+}
+@media (max-width:1024px){.desktop-nav-overflow{display:none!important}}
