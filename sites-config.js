@@ -13,8 +13,8 @@
     }),
     tambon1: Object.freeze({
       SITE_TYPE: 'TAMBOL',
-      MAIN_EXEC_URL: 'https://script.google.com/macros/s/AKfycbwuKYgVZRYIbujm1hHv4lQchRIPaKN-X300y7jOHgcNyvK_60-CFOzadomro0e4HVS59A/exec',
-      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycbytWX0psf7c4a88mgfeDnnOy13x4KcPSpS32G66NTm32igiHb2y-c0QqzkrgWpf4l0J/exec',
+      MAIN_EXEC_URL: 'https://script.google.com/macros/s/AKfycby7DjChYbHHeFr2aiPFzORgzGpTcsWmkyo80g7RXc3Vfmn7rV7lN5QhORBAgQpSNRmg/exec',
+      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycbwNB4dq0YXzd0Igk3KxXC_8vUG519Ceii8aZG3sc1nv2qYbzn4519K5LiYHCyl2Sfia9A/exec',
       CACHE_PREFIX: 'LP360:TAMBOL:TAMBON1:'
     }),
     tambon2: Object.freeze({
