@@ -1,0 +1,13 @@
+SITE HEADER UPDATE — 2026-10-03
+
+ทุกเว็บไซต์: อำเภอ / tambon1 / library
+1) ซ่อน [data-website-brand-name] ภายใน .site-header ทุกอุปกรณ์
+2) มือถือ/แท็บเล็ต: .nav-wrap โปร่งใส ไม่บังคับพื้นหลังขาว เพื่อให้ site-header ใช้สี/gradient ตาม Template และธีมสีที่เลือกเหมือน desktop
+3) Desktop >=1025px: ตรวจพื้นที่ main-nav จริง ถ้าเมนูเกินพื้นที่ จะซ่อนรายการท้ายที่ล้นและแสดงปุ่ม hamburger เมนูเพิ่มเติม
+4) เมนูใน hamburger รองรับทั้งลิงก์ปกติและ dropdown รวมรายการ dynamic จากชีต
+5) เมื่อ resize, เปลี่ยน Section/menu, หรือรายการ dynamic จากชีตเปลี่ยน ระบบคำนวณใหม่อัตโนมัติ
+
+ไฟล์เพิ่ม/แก้ต่อเว็บไซต์:
+- index.html
+- site-header-responsive-overflow.css (ใหม่)
+- desktop-nav-overflow.js (ใหม่)
