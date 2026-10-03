@@ -111,7 +111,7 @@
     items=data.items||[];
     mode=data.mode==='block'?'block':'none';
   }
-  async function openManager(){source='own';Swal.fire({title:'กำลังโหลด...',didOpen:()=>Swal.showLoading(),allowOutsideClick:false});try{await load('own');renderManager();}catch(e){Swal.fire('ผิดพลาด',e.message,'error')}}
+  async function openManager(){Swal.fire({title:'กำลังโหลด...',didOpen:()=>Swal.showLoading(),allowOutsideClick:false});try{const saved=await api('getsource');source=(saved&&saved.source)==='admin'?'admin':'own';await load(source);renderManager();}catch(e){Swal.fire('ผิดพลาด',e.message,'error')}}
   function renderManager(){Swal.fire({html:tableHtml(),showConfirmButton:false,showCloseButton:true,width:'96vw',customClass:{popup:'news-manager-popup'},didOpen:bindManager});}
   function bindManager(){
     const root=Swal.getPopup();
@@ -120,7 +120,10 @@
       const next=e.target.checked?'admin':'own';
       try{
         Swal.showLoading();
-        await load(next);
+        const saved=await api('setsource',{value:next});
+        source=(saved&&saved.source)==='admin'?'admin':'own';
+        document.dispatchEvent(new CustomEvent('news-admin-updated',{detail:{source}}));
+        await load(source);
         renderManager();
       }catch(err){Swal.fire('ผิดพลาด',err.message,'error')}
     };

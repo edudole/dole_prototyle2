@@ -47,6 +47,7 @@
 .news-source-switch input{position:absolute;opacity:0;pointer-events:none}
 .news-source-switch .slide-slider{width:54px;height:28px;flex-basis:54px}
 .news-source-switch .slide-slider::before{width:22px;height:22px}
+.news-source-switch input:checked + .slide-slider{background:#16a34a}
 .news-source-switch input:checked + .slide-slider::before{transform:translateX(26px)}
 .news-source-option{font-size:13px;white-space:nowrap;transition:color .2s,font-weight .2s}
 .news-source-option.is-active{color:#0f172a;font-weight:800}

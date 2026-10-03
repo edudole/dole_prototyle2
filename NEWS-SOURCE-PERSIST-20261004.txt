@@ -1,0 +1,19 @@
+LP360 NEWS SOURCE PERSIST UPDATE — 2026-10-04
+
+ขอบเขต: เว็บไซต์ตำบล tambon1/tambon2/tambon3 และเว็บไซต์ห้องสมุด
+
+การทำงานใหม่
+1) สวิตช์ข่าวสารของคุณ / ข่าวสารจาก admin จะจำค่าที่เลือกไว้ถาวร
+2) เก็บค่าที่ news_page!K1 ของฐานข่าวเดิมของเว็บไซต์นั้น
+   - admin = แสดงข่าวจาก DATABSE_MAIN_ID > news_page
+   - user = แสดงข่าวจากฐานข่าวเดิมของเว็บไซต์
+3) เมื่อเปิด pop-up จัดการข่าวสารใหม่ ระบบอ่าน K1 และแสดงสวิตช์ตำแหน่งเดิม
+4) เมื่อเลือก admin สวิตช์เป็นสีเขียว
+5) เมื่อเปลี่ยนแหล่งข่าว หน้า index จะ reload ส่วนข่าวทันทีผ่าน event news-admin-updated
+6) โหมด admin เป็น read-only ต่อไป: ไม่มีเพิ่ม/แก้ไข/ลบ/จัดลำดับ
+
+ไฟล์ Apps Script ที่ต้อง Deploy New version บน deployment เดิม:
+- AppsScript/Appscript เว็บไซต์ตำบล_NEWS-ADMIN-SOURCE.txt
+- AppsScript/Appscript เว็บไซต์ห้องสมุด_NEWS-ADMIN-SOURCE.txt
+
+หมายเหตุ: สำหรับ tambon2/tambon3 ให้ใช้โค้ดตำบลเดียวกัน แต่คงค่า ID_SHEET ของแต่ละตำบลตามเดิม
