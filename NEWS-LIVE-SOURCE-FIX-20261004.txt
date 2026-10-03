@@ -1,0 +1,11 @@
+แก้ไขข่าวสาร user/admin ให้หน้า index เปลี่ยนทันที
+
+สาเหตุ:
+- หลังสลับแหล่งข่าว ระบบล้าง homefast cache แล้ว แต่ window.__SITE_HOMEFAST_PREFETCH เดิมยังสามารถคืนข้อมูลข่าวเก่าได้
+
+แก้ไข:
+- loadNews(forceFresh) รองรับการเรียก ?mode=news สดแบบ cache:no-store
+- event news-admin-updated เรียก loadNews(true)
+- การโหลดหน้าเว็บปกติยังคงใช้ SiteFast/homefast เพื่อความเร็ว
+
+แก้ใน tambon1, tambon2, tambon3, library

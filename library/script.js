@@ -460,7 +460,7 @@ function renderSettingMenus(items) {
     };
   }
 
-  async function loadNews() {
+  async function loadNews(forceFresh = false) {
     const slider = document.getElementById('newsSlider');
     const slidesBox = document.getElementById('newsSlides');
     if (!slider || !slidesBox) return;
@@ -468,7 +468,14 @@ function renderSettingMenus(items) {
     try {
       let result;
 
-      if (window.SiteFast) {
+      // หลังผู้ดูแลสลับแหล่งข่าว ต้องอ่าน ?mode=news สดโดยตรง
+      // เพื่อไม่ให้ homefast/prefetch ชุดที่โหลดก่อนหน้าเอาข่าวเก่ากลับมาแสดง
+      if (forceFresh) {
+        const freshUrl = NEWS_API_URL + (NEWS_API_URL.includes('?') ? '&' : '?') + '_=' + Date.now();
+        const response = await fetch(freshUrl, { cache: 'no-store', credentials: 'omit' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        result = await response.json();
+      } else if (window.SiteFast) {
         result = Object.assign({ success: true }, await window.SiteFast.homePart('news'));
       } else {
         const response = await fetch(NEWS_API_URL, { cache: 'default' });
@@ -699,6 +706,7 @@ async function openNewsPopup(item) {
   });
   document.addEventListener('news-admin-updated', () => {
     window.SiteFast?.clear('homefast');
-    loadNews();
+    // รีเฟรชข่าวสดทันทีหลังสลับ user/admin โดยข้าม homefast prefetch เดิม
+    loadNews(true);
   });
 })();
