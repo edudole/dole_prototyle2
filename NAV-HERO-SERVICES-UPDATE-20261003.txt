@@ -1,0 +1,9 @@
+แก้ไข 2026-10-03
+- District: remove announcementText element
+- District mobile/tablet: hide announcement brand name; show nav-wrap brand name
+- All sites: responsive hero text sizes
+- All sites: add student services nav when #studentServicesBox exists/visible
+- All sites: remove standalone course menu
+- All sites: add Online Services dropdown with course/readbook/shopactivity, visibility follows section
+- mobileBottomNav mirrors main-nav and filters hidden online-service sections
+- Future sections with data-nav-label are auto-added to main-nav/mobileBottomNav

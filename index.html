@@ -394,6 +394,7 @@
   <link rel="stylesheet" href="hero-content-editor.css?v=20260924-tight-autosize-1">
   <script defer src="hero-content-editor.js?v=20260924-tight-autosize-1"></script>
   <link id="lpSweetAlertTemplate1Css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="responsive-nav-services.css?v=20261003-navhero-1">
 </head>
 <body class="website-data-loading">
   <div id="adminLoginModal" class="admin-login-modal" hidden>
@@ -442,7 +443,6 @@
         <span class="brand-icon" data-website-brand-icon></span>
         <span data-website-brand-name>.</span>
       </a>
-      <p id="announcementText" hidden></p>
       <div class="announcement-admin-actions" aria-label="การเข้าสู่ระบบผู้ดูแล">
         <button id="adminLoginButton" class="admin-access-button" type="button">
           <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
@@ -501,7 +501,6 @@
       </div>
 
       <a href="#learningSourceBox">แหล่งเรียนรู้</a>
-      <a href="#cliproomBox">หลักสูตรออนไลน์</a>
       <a href="#learningBaseModule">ช้อปกิจกรรม</a>
 
       <div class="main-nav-dropdown">
@@ -670,7 +669,7 @@
 </section>
 
 <!-- บริการนักศึกษา: อยู่หลัง news-info-row และก่อนรายการ User -->
-<section id="studentServicesBox" class="student-services-section" aria-labelledby="studentServicesTitle" data-admin-section="1">
+<section id="studentServicesBox" data-nav-label="บริการนักศึกษา" class="student-services-section" aria-labelledby="studentServicesTitle" data-admin-section="1">
   <div class="container">
     <div class="student-services-box">
       <h2 id="studentServicesTitle">บริการนักศึกษา</h2>
@@ -888,7 +887,7 @@
   </div>
 </section>
 
-<section id="readBookTimeBox" class="readbook-section" aria-labelledby="readBookTimeTitle" data-admin-section="6">
+<section id="readBookTimeBox" data-online-service-label="อ่านหนังสือสะสมเวลา" class="readbook-section" aria-labelledby="readBookTimeTitle" data-admin-section="6">
   <div class="container">
     <div class="readbook-admin-actions admin-only" aria-label="จัดการหนังสือสะสมเวลา">
       <a class="editwebsite-btn learning-admin-button admin-only" href="addreadbook.html" target="_blank" rel="noopener noreferrer">
@@ -919,7 +918,7 @@
   </div>
 </section>
 
-<section id="cliproomBox" class="cliproom-section" aria-labelledby="cliproomTitle" data-admin-section="7">
+<section id="cliproomBox" data-online-service-label="หลักสูตรออนไลน์" class="cliproom-section" aria-labelledby="cliproomTitle" data-admin-section="7">
   <div class="container">
     <div class="cliproom-admin-actions admin-only" aria-label="จัดการหลักสูตรอบรมออนไลน์">
       <a class="cliproom-admin-course-button" href="admincliproom.html" target="_blank" rel="noopener noreferrer">
@@ -953,7 +952,7 @@
   </div>
 </section>
 
-<section id="learningBaseModule" class="shopactivity-preview" aria-labelledby="shopActivityTitle" data-admin-section="8">
+<section id="learningBaseModule" data-online-service-label="ช้อปกิจกรรม" class="shopactivity-preview" aria-labelledby="shopActivityTitle" data-admin-section="8">
   <div class="container">
     <div class="shopactivity-admin-actions admin-only" aria-label="จัดการกิจกรรม">
       <a class="shopactivity-admin-edit-button" href="addactivity.html" target="_blank" rel="noopener noreferrer">
@@ -1334,7 +1333,8 @@
     <div id="mobileBottomPanelBody" class="mobile-bottom-panel-body"></div>
   </div>
 </nav>
-<script defer src="mobile-bottom-nav.js?v=20261003-direct-id-menu-5"></script>
+<script defer src="main-nav-services.js?v=20261003-services-1"></script>
+<script defer src="mobile-bottom-nav.js?v=20261003-services-6"></script>
   <!-- Popup ประชาสัมพันธ์จากชีต boss -->
   <div id="bossPopup" class="boss-popup" hidden aria-hidden="true">
     <div class="boss-popup-dialog" role="dialog" aria-modal="true" aria-label="ประชาสัมพันธ์">

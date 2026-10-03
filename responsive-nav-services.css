@@ -1,0 +1,41 @@
+/* LP360 responsive hero + navigation update 2026-10-03 */
+@media (max-width: 1024px) {
+  #heroKickerText {
+    font-size: clamp(10px, 1.7vw, 12px) !important;
+    line-height: 1.35 !important;
+    max-width: min(88vw, 680px) !important;
+    overflow-wrap: anywhere;
+  }
+  #heroTitleText {
+    font-size: clamp(30px, 6vw, 48px) !important;
+    line-height: 1.08 !important;
+    max-width: min(90vw, 720px) !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    overflow-wrap: anywhere;
+  }
+  #heroDescriptionText {
+    font-size: clamp(13px, 2.1vw, 16px) !important;
+    line-height: 1.55 !important;
+    max-width: min(88vw, 620px) !important;
+    margin-top: 0 !important;
+    overflow-wrap: anywhere;
+  }
+  .hero-content {
+    box-sizing: border-box;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
+@media (max-width: 640px) {
+  #heroKickerText { font-size: 10px !important; letter-spacing: 1.1px !important; }
+  #heroTitleText { font-size: clamp(25px, 8.6vw, 36px) !important; line-height: 1.1 !important; max-width: 92vw !important; }
+  #heroDescriptionText { font-size: 13px !important; line-height: 1.48 !important; max-width: 90vw !important; }
+  .hero-content { padding-left: 14px !important; padding-right: 14px !important; }
+}
+.main-nav [hidden], .main-nav-dropdown-menu a[hidden] { display: none !important; }
+
+@media (max-width: 1024px) {
+  .announcement .announcement-inner [data-website-brand-name] { display: none !important; }
+  .site-header .nav-wrap > .brand [data-website-brand-name] { display: inline !important; visibility: visible !important; opacity: 1 !important; max-width: min(52vw, 420px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

@@ -6,6 +6,8 @@
     [/รู้จักเรา|เกี่ยวกับ|about/i, 'fa-solid fa-circle-info'],
     [/ผลงาน/i, 'fa-solid fa-trophy'],
     [/แหล่งเรียนรู้/i, 'fa-solid fa-location-dot'],
+    [/บริการนักศึกษา/i, 'fa-solid fa-user-graduate'],
+    [/บริการออนไลน์/i, 'fa-solid fa-globe'],
     [/หลักสูตร/i, 'fa-solid fa-graduation-cap'],
     [/ช้อปกิจกรรม|กิจกรรม/i, 'fa-solid fa-bag-shopping'],
     [/ห้องสมุด/i, 'fa-solid fa-book-open'],
@@ -151,7 +153,15 @@
 
     // อ่าน link จาก DOM ตัวจริงทุกครั้งที่กด โดยเฉพาะ districtMenuList/libraryMenuList
     // ซึ่งถูก render จากข้อมูลชีตภายหลังการโหลดหน้า
-    return Array.from(menu.querySelectorAll('a[href]')).map(link => ({
+    return Array.from(menu.querySelectorAll('a[href]')).filter(link => {
+      if (link.hidden) return false;
+      const href = link.getAttribute('href') || '';
+      if (href.startsWith('#') && href.length > 1) {
+        const target = document.getElementById(href.slice(1));
+        return !!target && target.dataset.sectionVisible !== 'false' && !target.hidden;
+      }
+      return true;
+    }).map(link => ({
       label: cleanLabel(link.textContent),
       href: link.getAttribute('href') || link.href,
       target: link.getAttribute('target') || '',
@@ -337,7 +347,7 @@
     const id = sectionIdFromHref(def.href);
     if (!id) return true;
     const section = document.getElementById(id);
-    return !section || section.dataset.sectionVisible !== 'false';
+    return !!section && section.dataset.sectionVisible !== 'false' && !section.hidden;
   }
 
   function syncSectionVisibility() {
@@ -491,6 +501,7 @@
     });
 
     buildFromMainNav();
+    document.addEventListener('lp360:main-nav-updated', buildFromMainNav);
     bindVisibilityObserver();
     bindDesktopMenuObserver();
 
