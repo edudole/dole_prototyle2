@@ -1,0 +1,30 @@
+LP360 MOBILE/TABLET ANNOUNCEMENT + HERO FIT - 2026-10-03
+
+แก้ไขทุกเว็บไซต์: อำเภอ / tambon1 / library
+
+1) Announcement เฉพาะ <= 1024px
+- ซ่อน a.brand.brand-light
+- จัด announcement-admin-actions และ announcementSocials ให้อยู่กึ่งกลางผ่าน wrapper .announcement-mobile-center
+- Desktop คง layout เดิมด้วย display: contents
+
+2) Hero เฉพาะ <= 1024px
+- เพิ่ม mobile-hero-fit.js เพื่อ override inline !important จาก Hero Editor เฉพาะ viewport เล็ก
+- ลดขนาด heroKickerText / heroTitleText / heroDescriptionText ตามขนาดหน้าจอ
+- จำกัดความกว้าง hero-content ไม่ให้ล้น viewport
+- ตรวจความสูงเทียบ websiteHeroOverlay และย่อข้อความเพิ่มหากยังเกินพื้นที่
+- เมื่อกลับ desktop > 1024px คืนค่าขนาด inline เดิม
+
+ไฟล์ที่แก้:
+- /index.html
+- /responsive-nav-services.css
+- /tambon1/index.html
+- /tambon1/responsive-nav-services.css
+- /library/index.html
+- /library/responsive-nav-services.css
+
+ไฟล์ที่เพิ่ม:
+- /mobile-hero-fit.js
+- /tambon1/mobile-hero-fit.js
+- /library/mobile-hero-fit.js
+
+ไม่แก้ sites-config.js, /exec, Apps Script, CRUD, Template data หรือระบบอื่น

@@ -39,3 +39,59 @@
   .announcement .announcement-inner [data-website-brand-name] { display: none !important; }
   .site-header .nav-wrap > .brand [data-website-brand-name] { display: inline !important; visibility: visible !important; opacity: 1 !important; max-width: min(52vw, 420px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+
+/* LP360 mobile/tablet announcement + hero fit 2026-10-03 */
+.announcement-mobile-center { display: contents; }
+
+@media (max-width: 1024px) {
+  .announcement .announcement-inner > a.brand.brand-light {
+    display: none !important;
+  }
+
+  .announcement .announcement-inner {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .announcement .announcement-inner > #announcementText {
+    width: 100% !important;
+    max-width: min(92vw, 760px) !important;
+    text-align: center !important;
+  }
+
+  .announcement-mobile-center {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px 12px !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+  }
+
+  .announcement-mobile-center .announcement-admin-actions,
+  .announcement-mobile-center #announcementSocials {
+    display: flex;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    justify-self: center !important;
+  }
+
+  .announcement-mobile-center #announcementSocials[hidden] {
+    display: none !important;
+  }
+
+  #home.hero .hero-content.lp-hero-content-managed {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
