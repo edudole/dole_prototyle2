@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const DESKTOP_MIN = 1025;
+  const FIT_TOLERANCE = 6;
   let queued = false;
   let measuring = false;
 
@@ -110,22 +111,49 @@
       const panel=box.querySelector('.desktop-nav-overflow-panel');
       const btn=box.querySelector('.desktop-nav-overflow-toggle');
       const wasOpen=!!(panel && !panel.hidden && btn?.getAttribute('aria-expanded')==='true');
+
       Array.from(nav.children).forEach(el=>el.classList.remove('lp-desktop-overflow-hidden'));
-      box.hidden=true;
-      if(!isDesktop()) { closeOverflow(); return; }
+      if(!isDesktop()) {
+        box.hidden=true;
+        box.style.removeProperty('visibility');
+        box.style.removeProperty('pointer-events');
+        closeOverflow();
+        return;
+      }
+
       const candidates=visibleOriginals(nav);
-      if(!candidates.length) return;
-      // First test with the full nav. A tiny tolerance avoids rounding-only overflow.
-      if(nav.scrollWidth <= nav.clientWidth + 2) return;
+      if(!candidates.length) {
+        box.hidden=true;
+        closeOverflow();
+        return;
+      }
+
+      // วัดโดยสำรองพื้นที่ของปุ่มแฮมเบอร์เกอร์ไว้ตลอดรอบการคำนวณ
+      // เพื่อไม่ให้ available width เปลี่ยนไปมาแล้วเมนูเด้งเข้า/ออก overflow.
       box.hidden=false;
-      // Hide trailing items until the real nav fits beside the hamburger button.
-      for(let i=candidates.length-1;i>=0 && nav.scrollWidth>nav.clientWidth+2;i--){
+      box.style.visibility='hidden';
+      box.style.pointerEvents='none';
+      panel.hidden=true;
+
+      for(let i=candidates.length-1; i>=0 && nav.scrollWidth > nav.clientWidth + FIT_TOLERANCE; i--){
         candidates[i].classList.add('lp-desktop-overflow-hidden');
       }
+
+      const hasHidden=!!nav.querySelector('.lp-desktop-overflow-hidden');
+      if(!hasHidden){
+        box.hidden=true;
+        box.style.removeProperty('visibility');
+        box.style.removeProperty('pointer-events');
+        closeOverflow();
+        return;
+      }
+
+      box.hidden=false;
+      box.style.removeProperty('visibility');
+      box.style.removeProperty('pointer-events');
       rebuildPanel(nav,panel);
-      if(wasOpen && !box.hidden && panel && btn){ panel.hidden=false; btn.setAttribute('aria-expanded','true'); }
-      // If nothing ended up hidden, the button is unnecessary.
-      if(!nav.querySelector('.lp-desktop-overflow-hidden')) { box.hidden=true; closeOverflow(); }
+      if(wasOpen){ panel.hidden=false; btn.setAttribute('aria-expanded','true'); }
+      else { panel.hidden=true; btn.setAttribute('aria-expanded','false'); }
     } finally { measuring=false; }
   }
 

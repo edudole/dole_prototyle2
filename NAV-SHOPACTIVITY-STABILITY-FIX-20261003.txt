@@ -1,0 +1,23 @@
+LP360 NAV SHOP ACTIVITY + STABILITY FIX — 2026-10-03
+
+แก้ทุกเว็บไซต์: อำเภอ / tambon1 / library
+
+1) ช้อปกิจกรรม
+- นำเมนู "ช้อปกิจกรรม" กลับมาเป็นเมนูระดับบน
+- ลิงก์ไป #learningBaseModule
+- แสดง/ซ่อนตาม data-section-visible และ hidden ของ SECTION เดิม
+- mobileBottomNav sync จาก main-nav จึงแสดง/ซ่อนตามกัน
+
+2) แก้เมนูเด้งเข้า/ออกปุ่มแฮมเบอร์เกอร์
+- desktop overflow วัดพื้นที่โดยสำรองพื้นที่ปุ่ม hamburger ตลอดรอบคำนวณ
+- เพิ่ม tolerance ลดผลจาก sub-pixel/font rounding
+- ไม่สั่ง sync main-nav ทุกครั้งที่เนื้อหาภายใน SECTION เปลี่ยน
+- sync เฉพาะเมื่อ SECTION เพิ่ม/ลบ หรือ attribute ที่เกี่ยวกับ visibility/ชื่อเมนูเปลี่ยน
+- dispatch lp360:main-nav-updated เฉพาะเมื่อโครงสร้าง/ชื่อ/visibility ของเมนูเปลี่ยนจริง
+
+ไฟล์ที่แก้ต่อเว็บไซต์:
+- index.html
+- main-nav-services.js
+- desktop-nav-overflow.js
+
+ตรวจ JavaScript 184 ไฟล์: syntax error 0

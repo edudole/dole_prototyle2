@@ -2,8 +2,9 @@
   'use strict';
 
   const STANDALONE_ONLINE = [
-    { label: 'หลักสูตรออนไลน์', href: '#cliproomBox' },
-    { label: 'อ่านหนังสือสะสมเวลา', href: '#readBookTimeBox' }
+    { label: 'หลักสูตรออนไลน์', href: '#cliproomBox', key: 'online-course' },
+    { label: 'อ่านหนังสือสะสมเวลา', href: '#readBookTimeBox', key: 'readbook-time' },
+    { label: 'ช้อปกิจกรรม', href: '#learningBaseModule', key: 'shop-activity' }
   ];
 
   const EXCLUDED_SECTION_IDS = new Set(['studentBox', 'buttonsection']);
@@ -21,17 +22,14 @@
     buttonsection: 'ปุ่มทางลัด'
   });
 
+  let lastSignature = '';
+
   function cleanLabel(value) {
     return String(value || '').replace(/[▾▼⌄]+/g, '').replace(/\s+/g, ' ').trim();
   }
 
   function sectionVisibleByElement(el) {
     return !!el && el.dataset.sectionVisible !== 'false' && !el.hidden;
-  }
-
-  function sectionVisible(href) {
-    if (!href || !href.startsWith('#')) return true;
-    return sectionVisibleByElement(document.getElementById(href.slice(1)));
   }
 
   function sectionLabel(section) {
@@ -66,13 +64,6 @@
     });
   }
 
-  function removeStandaloneShopActivity(nav) {
-    Array.from(nav.children).forEach(node => {
-      if (!node.matches?.('a[href="#learningBaseModule"]')) return;
-      if (/ช้อปกิจกรรม/i.test(cleanLabel(node.textContent))) node.remove();
-    });
-  }
-
   function ensureStudentLink(nav) {
     let a = nav.querySelector('[data-lp360-nav="student-services"]');
     const section = document.getElementById('studentServicesBox');
@@ -92,7 +83,7 @@
   }
 
   function ensureStandaloneOnlineLinks(nav) {
-    // Remove the old “บริการออนไลน์” dropdown if it still exists from an earlier build.
+    // “บริการออนไลน์” แบบ dropdown ถูกยกเลิกแล้ว
     nav.querySelector('[data-lp360-nav="online-services"]')?.remove();
 
     STANDALONE_ONLINE.forEach((item, index) => {
@@ -105,19 +96,20 @@
       if (!a) {
         a = document.createElement('a');
         a.href = item.href;
-        a.dataset.lp360Nav = index === 0 ? 'online-course' : 'readbook-time';
+        a.dataset.lp360Nav = item.key;
+
+        const previous = index > 0
+          ? Array.from(nav.children).find(node => node.matches?.(`a[href="${STANDALONE_ONLINE[index - 1].href}"]`))
+          : null;
         const student = nav.querySelector('[data-lp360-nav="student-services"]');
-        const previous = index > 0 ? Array.from(nav.children).find(node => node.matches?.(`a[href="${STANDALONE_ONLINE[index - 1].href}"]`)) : null;
         if (previous) previous.after(a);
         else if (student) student.after(a);
         else nav.appendChild(a);
       }
+      a.dataset.lp360Nav = item.key;
       a.textContent = item.label;
       a.hidden = !sectionVisibleByElement(section);
     });
-
-    // “ช้อปกิจกรรม” stays out of the top-level menu.
-    removeStandaloneShopActivity(nav);
   }
 
   function syncExistingSectionLinks(nav) {
@@ -126,14 +118,12 @@
       const href = node.getAttribute('href');
       if (!href || href === '#home') return;
       const target = document.getElementById(href.slice(1));
-      // Non-generated section links disappear when their SECTION no longer exists.
       if (!target) {
         node.hidden = true;
         return;
       }
       node.hidden = !sectionVisibleByElement(target);
-      const autoName = node.dataset.lp360AutoSection;
-      if (autoName) node.textContent = sectionLabel(target);
+      if (node.dataset.lp360AutoSection) node.textContent = sectionLabel(target);
     });
   }
 
@@ -141,7 +131,6 @@
     const sections = Array.from(document.querySelectorAll('main section[id]'));
     const currentIds = new Set(sections.map(section => section.id));
 
-    // Remove generated menu entries when the corresponding SECTION is deleted.
     nav.querySelectorAll('a[data-lp360-auto-section]').forEach(a => {
       const id = a.dataset.lp360AutoSection || '';
       if (!currentIds.has(id)) a.remove();
@@ -151,8 +140,8 @@
       if (!section.id || section.id === 'home') return;
       const href = `#${section.id}`;
 
-      // These are intentionally represented elsewhere.
-      if (STANDALONE_ONLINE.some(item => item.href === href) || href === '#learningBaseModule' || section.id === 'studentServicesBox' || EXCLUDED_SECTION_IDS.has(section.id)) return;
+      // รายการเหล่านี้มีตำแหน่ง/ชื่อที่กำหนดไว้โดยระบบ ไม่สร้างซ้ำจาก auto section
+      if (STANDALONE_ONLINE.some(item => item.href === href) || section.id === 'studentServicesBox' || EXCLUDED_SECTION_IDS.has(section.id)) return;
 
       const existing = Array.from(nav.children).find(node => node.matches?.(`a[href="${href}"]`));
       if (existing) {
@@ -170,16 +159,35 @@
     });
   }
 
+  function navSignature(nav) {
+    return Array.from(nav.children).map(node => {
+      if (node.matches?.('a[href]')) {
+        return ['a', node.getAttribute('href') || '', cleanLabel(node.textContent), node.hidden ? '0' : '1'].join('|');
+      }
+      if (node.classList?.contains('main-nav-dropdown')) {
+        const toggle = node.querySelector(':scope > .main-nav-dropdown-toggle');
+        const links = Array.from(node.querySelectorAll(':scope > .main-nav-dropdown-menu a[href]'))
+          .map(a => `${a.getAttribute('href') || ''}:${cleanLabel(a.textContent)}:${a.hidden ? 0 : 1}`).join(',');
+        return ['d', cleanLabel(toggle?.textContent || ''), node.hidden ? '0' : '1', links].join('|');
+      }
+      return ['x', node.tagName || '', node.hidden ? '0' : '1'].join('|');
+    }).join('||');
+  }
+
   function sync() {
     const nav = document.querySelector('.site-header .main-nav');
     if (!nav) return;
     removeExcludedShortcutLinks(nav);
-    removeStandaloneShopActivity(nav);
     ensureStudentLink(nav);
     ensureStandaloneOnlineLinks(nav);
     syncAutoSections(nav);
     syncExistingSectionLinks(nav);
-    document.dispatchEvent(new CustomEvent('lp360:main-nav-updated'));
+
+    const signature = navSignature(nav);
+    if (signature !== lastSignature) {
+      lastSignature = signature;
+      document.dispatchEvent(new CustomEvent('lp360:main-nav-updated'));
+    }
   }
 
   let queued = false;
@@ -192,11 +200,24 @@
     });
   }
 
+  function mutationNeedsSync(records) {
+    return records.some(record => {
+      if (record.type === 'attributes') {
+        return record.target instanceof Element && record.target.matches('section[id]');
+      }
+      if (record.type !== 'childList') return false;
+      const changed = [...record.addedNodes, ...record.removedNodes];
+      return changed.some(node => node instanceof Element && (node.matches?.('section[id]') || node.querySelector?.('section[id]')));
+    });
+  }
+
   function init() {
     sync();
     const main = document.querySelector('main');
     if (main) {
-      new MutationObserver(queueSync).observe(main, {
+      new MutationObserver(records => {
+        if (mutationNeedsSync(records)) queueSync();
+      }).observe(main, {
         subtree: true,
         childList: true,
         attributes: true,
