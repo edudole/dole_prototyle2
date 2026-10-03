@@ -8,8 +8,8 @@
     <script src="app-config.js?v=20260901-central-api-1"></script>
 <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="เว็บไซต์ ศกร.ระดับแขวงบางรัก สนับสนุนการเรียนรู้ 3 ด้าน ตลอดชีวิต | เพื่อพัฒนาตน | เพื่อคุณวุฒิตามระดับ" />
-  <title>ศกร.ระดับแขวงบางรัก</title>
+  <meta name="description" content="" data-lp360-dynamic-seo="description" />
+  <title></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://script.google.com" crossorigin>
   <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
@@ -26,11 +26,33 @@
     (function () {
       var NS = "LP360:TAMBOL:BANG_RAK:";
       var API = window.APP_CONFIG.API_URL;
-      var cacheKey = NS + 'SITE_FAST:homefast-v13-first-image-20260917';
+      var cacheKey = NS + 'SITE_FAST:homefast-v15-seo-t3t4-20261004';
       var heroKey = NS + 'CRITICAL_IMAGE:hero-v1';
       var maxAge = 24 * 60 * 60 * 1000;
       var admin = false;
       try { admin = Boolean(sessionStorage.getItem(NS + 'mysiteAdminToken')); } catch (_) {}
+
+      function applySeoMetaFromHome(data) {
+        var root = data && data.data && typeof data.data === 'object' ? data.data : data;
+        var seo = root && root.seo ? root.seo : null;
+        if (!seo) return;
+        var title = String(seo.title || '').trim();
+        var description = String(seo.description || '').trim();
+        if (title) {
+          document.title = title;
+          window.__LP360_SEO_TITLE = title;
+        }
+        var meta = document.querySelector('meta[name="description"]');
+        if (meta && description) meta.setAttribute('content', description);
+      }
+
+      function applySeoFromStorage(storage) {
+        try {
+          var saved = JSON.parse(storage.getItem(cacheKey) || 'null');
+          if (saved && saved.data) applySeoMetaFromHome(saved.data);
+        } catch (_) {}
+      }
+      try { applySeoFromStorage(window.sessionStorage); applySeoFromStorage(window.localStorage); } catch (_) {}
 
       function optimizedImage(url, width) {
         url = String(url || '').trim();
@@ -284,6 +306,9 @@
         { method: 'GET', cache: 'default', credentials: 'omit', signal: controller ? controller.signal : undefined }
       ).then(function (response) {
         return response.ok ? response.json() : null;
+      }).then(function (result) {
+        if (result) applySeoMetaFromHome(result);
+        return result;
       }).catch(function () {
         return null;
       }).finally(function () {
