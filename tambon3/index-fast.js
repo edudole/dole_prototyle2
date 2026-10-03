@@ -62,23 +62,10 @@
     return `https://lh3.googleusercontent.com/d/${match[1]}=w${Math.round(size)}`;
   }
 
-  function applySeoMeta(seo) {
-    if (!seo || typeof seo !== 'object') return;
-    const title = String(seo.title || '').trim();
-    const description = String(seo.description || '').trim();
-    if (title) {
-      document.title = title;
-      window.__LP360_SEO_TITLE = title;
-    }
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta && description) meta.setAttribute('content', description);
-  }
-
   function optimizeHomeFastPayload(payload) {
     const root = payload && payload.data && typeof payload.data === 'object' ? payload.data : payload;
     if (!root || typeof root !== 'object') return payload;
 
-    applySeoMeta(root.seo);
 
     if (root.images) {
       root.images.brandIcon = fastImageUrl(root.images.brandIcon, 320);

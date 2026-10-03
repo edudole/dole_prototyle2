@@ -8,8 +8,11 @@
   <meta charset="UTF-8" />
   <script src="app-config.js?v=20260917-1"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="" data-lp360-dynamic-seo="description" />
-  <title></title>
+  <meta name="description" content="เว็บไซต์ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอ" data-lp360-config-seo="description" />
+  <meta property="og:title" content="เว็บไซต์ สกร.ระดับอำเภอ" data-lp360-config-og="1" />
+  <meta property="og:description" content="เว็บไซต์ศูนย์ส่งเสริมการเรียนรู้ระดับอำเภอ" data-lp360-config-og="1" />
+  <meta property="og:type" content="website" data-lp360-config-og="1" />
+  <title data-lp360-config-seo="title">เว็บไซต์ สกร.ระดับอำเภอ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://script.google.com" crossorigin>
   <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
@@ -32,27 +35,6 @@
       var admin = false;
       try { admin = Boolean(sessionStorage.getItem(NS + 'mysiteAdminToken')); } catch (_) {}
 
-      function applySeoMetaFromHome(data) {
-        var root = data && data.data && typeof data.data === 'object' ? data.data : data;
-        var seo = root && root.seo ? root.seo : null;
-        if (!seo) return;
-        var title = String(seo.title || '').trim();
-        var description = String(seo.description || '').trim();
-        if (title) {
-          document.title = title;
-          window.__LP360_SEO_TITLE = title;
-        }
-        var meta = document.querySelector('meta[name="description"]');
-        if (meta && description) meta.setAttribute('content', description);
-      }
-
-      function applySeoFromStorage(storage) {
-        try {
-          var saved = JSON.parse(storage.getItem(cacheKey) || 'null');
-          if (saved && saved.data) applySeoMetaFromHome(saved.data);
-        } catch (_) {}
-      }
-      try { applySeoFromStorage(window.sessionStorage); applySeoFromStorage(window.localStorage); } catch (_) {}
 
       function optimizedImage(url, width) {
         url = String(url || '').trim();
@@ -307,7 +289,6 @@
       ).then(function (response) {
         return response.ok ? response.json() : null;
       }).then(function (result) {
-        if (result) applySeoMetaFromHome(result);
         return result;
       }).catch(function () {
         return null;

@@ -1,4 +1,4 @@
-name: Update LINE SEO from Google Sheet
+name: Apply LINE SEO from sites-config
 
 on:
   workflow_dispatch:
@@ -8,23 +8,17 @@ on:
       - 'sites-config.js'
       - 'tools/update-seo.mjs'
       - '.github/workflows/update-line-seo.yml'
-  schedule:
-    - cron: '17,47 * * * *'
 
 permissions:
   contents: write
 
 concurrency:
-  group: lp360-seo-prerender
+  group: lp360-static-seo
   cancel-in-progress: true
 
 jobs:
   update-seo:
     runs-on: ubuntu-latest
-    env:
-      # ถ้าต้องการใช้ Custom Domain ให้สร้าง Repository variable ชื่อ SEO_PUBLIC_BASE_URL
-      # หากไม่กำหนด จะใช้ https://OWNER.github.io/REPOSITORY/ อัตโนมัติ
-      SEO_PUBLIC_BASE_URL: ${{ vars.SEO_PUBLIC_BASE_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,10 +30,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Read T3/T4 and write static SEO
+      - name: Write title and description from sites-config.js
         run: node tools/update-seo.mjs
 
-      - name: Verify LINE SEO is static in HTML
+      - name: Verify static LINE SEO
         shell: bash
         run: |
           set -e
@@ -48,12 +42,13 @@ jobs:
             if [ -f "$d/index.html" ]; then files+=("$d/index.html"); fi
           done
           for f in "${files[@]}"; do
-            grep -Eq '<title>[^<]+</title>' "$f" || { echo "ERROR: $f title ว่าง"; exit 1; }
-            grep -Eq '<meta property="og:title" content="[^"]+"' "$f" || { echo "ERROR: $f ไม่มี og:title"; exit 1; }
-            grep -Eq '<meta property="og:description" content="[^"]+"' "$f" || { echo "ERROR: $f ไม่มี og:description"; exit 1; }
+            grep -Eq '<title[^>]*>[^<]+</title>' "$f" || { echo "ERROR: $f title ว่าง"; exit 1; }
+            grep -Eq '<meta name="description" content="[^"]+' "$f" || { echo "ERROR: $f description ว่าง"; exit 1; }
+            grep -Eq '<meta property="og:title" content="[^"]+' "$f" || { echo "ERROR: $f ไม่มี og:title"; exit 1; }
+            grep -Eq '<meta property="og:description" content="[^"]+' "$f" || { echo "ERROR: $f ไม่มี og:description"; exit 1; }
           done
 
-      - name: Commit updated SEO
+      - name: Commit generated static SEO
         shell: bash
         run: |
           if git diff --quiet; then
@@ -63,5 +58,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html 'tambon*/index.html' 'library/index.html'
-          git commit -m "chore: update LINE/OG SEO from Google Sheet [skip ci]"
+          git commit -m "chore: apply static LINE SEO from sites-config [skip ci]"
           git push
