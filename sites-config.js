@@ -77,8 +77,6 @@
   window.LP360_SITES_CONFIG = SITES;
   window.LP360_CURRENT_SITE_KEY = SITE_KEY;
   window.APP_CONFIG = cfg;
-  // Keep browser tab title aligned with the static SEO value from this single config.
-  window.__LP360_SEO_TITLE = cfg.SEO_TITLE || '';
   if (cfg.STUDENT_PROFILE_EXEC_URL) {
     window.STUDENT_PROFILE_WEB_APP_URL = cfg.STUDENT_PROFILE_EXEC_URL;
   }

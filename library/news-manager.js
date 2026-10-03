@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const API_URL = window.APP_CONFIG.API_URL;
-  let items = [], mode = 'none';
+  let items = [], mode = 'none', source = 'own';
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
   async function api(action, data = {}) {
     const token = sessionStorage.getItem('LP360:LIBRARY:mysiteAdminToken') || '';
@@ -83,11 +83,60 @@
       URL.revokeObjectURL(objectUrl);
     }
   }
-  function tableHtml(){return `<div class="news-manager-shell"><div class="news-manager-toolbar"><h2>จัดการข่าวสาร</h2><div class="news-manager-actions"><label class="news-manager-switch"><input id="newsManagerMode" type="checkbox" ${mode==='block'?'checked':''}><span class="slide-slider" aria-hidden="true"></span><span class="slide-text">${mode==='block'?'แสดงภาพเป็นสไลด์':'แสดงภาพเป็นภาพนิ่ง'}</span></label><button id="newsManagerAdd" class="news-manager-add">เพิ่มข่าวใหม่</button></div></div><div class="news-manager-body"><div class="news-manager-table-wrap"><table class="news-manager-table"><thead><tr><th>จัดลำดับ</th><th>ข่าวที่</th><th>หัวข้อหลัก</th><th>รูปภาพ</th><th>รายละเอียดโดยย่อ</th><th>URL</th><th>วันที่ลงข่าว</th><th>จัดการ</th></tr></thead><tbody>${items.length?items.map(i=>`<tr><td><button class="news-manager-btn news-manager-up" data-move="up" data-row="${i.rowNumber}">▲</button><button class="news-manager-btn news-manager-down" data-move="down" data-row="${i.rowNumber}">▼</button></td><td>${modeBadge(i.newsNo)}<div>${esc(i.newsNo)}</div></td><td>${esc(i.title)}</td><td><img class="news-manager-thumb" data-image="${esc(i.imageUrl)}" src="${esc(i.imageUrl)}" alt=""></td><td>${esc(i.detail)}</td><td>${i.detailUrl?`<a class="news-manager-link" href="${esc(i.detailUrl)}" target="_blank" rel="noopener">Link</a>`:''}</td><td>${esc(i.postDate)}</td><td><button class="news-manager-btn news-manager-edit" data-edit="${i.rowNumber}" title="แก้ไข" aria-label="แก้ไข" style="display:inline-flex;width:38px;height:36px;padding:0;align-items:center;justify-content:center;border:0;border-radius:8px;color:#fff;cursor:pointer;vertical-align:middle;background:#f59e0b"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:currentColor;display:block"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.04a.996.996 0 0 0 0-1.41l-2.5-2.5a.996.996 0 1 0-1.41 1.41l2.5 2.5c.39.39 1.03.39 1.41 0z"/></svg></button><button class="news-manager-btn news-manager-delete" data-delete="${i.rowNumber}" title="ลบ" aria-label="ลบ" style="display:inline-flex;width:38px;height:36px;padding:0;align-items:center;justify-content:center;border:0;border-radius:8px;color:#fff;cursor:pointer;vertical-align:middle;background:#dc2626"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:currentColor;display:block"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm3.46-7.12 1.41-1.41L12 11.59l1.12-1.12 1.41 1.41L13.41 13l1.12 1.12-1.41 1.41L12 14.41l-1.12 1.12-1.41-1.41L10.59 13l-1.13-1.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center">ยังไม่มีข้อมูลข่าวสาร</td></tr>'}</tbody></table></div></div></div>`}
-  async function load(){const data=await api('list');items=data.items||[];mode=data.mode==='block'?'block':'none';}
-  async function openManager(){Swal.fire({title:'กำลังโหลด...',didOpen:()=>Swal.showLoading(),allowOutsideClick:false});try{await load();renderManager();}catch(e){Swal.fire('ผิดพลาด',e.message,'error')}}
+  function sourceSwitchHtml(){
+    const adminSelected = source === 'admin';
+    return `<label class="news-source-switch" title="เลือกแหล่งข่าวสาร"><span class="news-source-option ${adminSelected?'':'is-active'}">ข่าวสารของคุณ</span><input id="newsManagerSource" type="checkbox" ${adminSelected?'checked':''}><span class="slide-slider" aria-hidden="true"></span><span class="news-source-option ${adminSelected?'is-active':''}">ข่าวสารจาก admin</span></label>`;
+  }
+  function tableRowsHtml(){
+    if(!items.length) return '<tr><td colspan="8" style="text-align:center">ยังไม่มีข้อมูลข่าวสาร</td></tr>';
+    const readOnly = source === 'admin';
+    return items.map((i,index)=>`<tr>
+      <td>${readOnly ? `<span class="news-readonly-order">${index+1}</span>` : `<button class="news-manager-btn news-manager-up" data-move="up" data-row="${i.rowNumber}">▲</button><button class="news-manager-btn news-manager-down" data-move="down" data-row="${i.rowNumber}">▼</button>`}</td>
+      <td>${modeBadge(i.newsNo)}<div>${esc(i.newsNo)}</div></td>
+      <td>${esc(i.title)}</td>
+      <td><img class="news-manager-thumb" data-image="${esc(i.imageUrl)}" src="${esc(i.imageUrl)}" alt=""></td>
+      <td>${esc(i.detail)}</td>
+      <td>${i.detailUrl?`<a class="news-manager-link" href="${esc(i.detailUrl)}" target="_blank" rel="noopener">Link</a>`:''}</td>
+      <td>${esc(i.postDate)}</td>
+      <td>${readOnly ? '<span class="news-readonly-badge"><i class="fa-solid fa-lock" aria-hidden="true"></i> อ่านอย่างเดียว</span>' : `<button class="news-manager-btn news-manager-edit" data-edit="${i.rowNumber}" title="แก้ไข" aria-label="แก้ไข" style="display:inline-flex;width:38px;height:36px;padding:0;align-items:center;justify-content:center;border:0;border-radius:8px;color:#fff;cursor:pointer;vertical-align:middle;background:#f59e0b"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:currentColor;display:block"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.04a.996.996 0 0 0 0-1.41l-2.5-2.5a.996.996 0 1 0-1.41 1.41l2.5 2.5c.39.39 1.03.39 1.41 0z"/></svg></button><button class="news-manager-btn news-manager-delete" data-delete="${i.rowNumber}" title="ลบ" aria-label="ลบ" style="display:inline-flex;width:38px;height:36px;padding:0;align-items:center;justify-content:center;border:0;border-radius:8px;color:#fff;cursor:pointer;vertical-align:middle;background:#dc2626"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:currentColor;display:block"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm3.46-7.12 1.41-1.41L12 11.59l1.12-1.12 1.41 1.41L13.41 13l1.12 1.12-1.41 1.41L12 14.41l-1.12 1.12-1.41-1.41L10.59 13l-1.13-1.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`}</td>
+    </tr>`).join('');
+  }
+  function tableHtml(){
+    const readOnly = source === 'admin';
+    return `<div class="news-manager-shell" data-news-source="${source}"><div class="news-manager-toolbar"><h2>จัดการข่าวสาร</h2><div class="news-manager-source-wrap">${sourceSwitchHtml()}</div><div class="news-manager-actions"><label class="news-manager-switch ${readOnly?'is-disabled':''}" title="${readOnly?'ข่าวสารจาก admin เป็นข้อมูลอ่านอย่างเดียว':''}"><input id="newsManagerMode" type="checkbox" ${mode==='block'?'checked':''} ${readOnly?'disabled':''}><span class="slide-slider" aria-hidden="true"></span><span class="slide-text">${mode==='block'?'แสดงภาพเป็นสไลด์':'แสดงภาพเป็นภาพนิ่ง'}</span></label>${readOnly?'':'<button id="newsManagerAdd" class="news-manager-add">เพิ่มข่าวใหม่</button>'}</div></div><div class="news-source-note ${readOnly?'is-admin':''}">${readOnly?'กำลังแสดงข่าวสารจาก admin — ตารางนี้อ่านอย่างเดียว ไม่สามารถแก้ไข ลบ หรือจัดลำดับได้':'กำลังแสดงข่าวสารของคุณ — สามารถเพิ่ม แก้ไข ลบ และจัดลำดับได้'}</div><div class="news-manager-body"><div class="news-manager-table-wrap"><table class="news-manager-table"><thead><tr><th>จัดลำดับ</th><th>ข่าวที่</th><th>หัวข้อหลัก</th><th>รูปภาพ</th><th>รายละเอียดโดยย่อ</th><th>URL</th><th>วันที่ลงข่าว</th><th>จัดการ</th></tr></thead><tbody>${tableRowsHtml()}</tbody></table></div></div></div>`;
+  }
+  async function load(nextSource=source){
+    source = nextSource === 'admin' ? 'admin' : 'own';
+    const data=await api(source==='admin'?'listadmin':'list');
+    items=data.items||[];
+    mode=data.mode==='block'?'block':'none';
+  }
+  async function openManager(){source='own';Swal.fire({title:'กำลังโหลด...',didOpen:()=>Swal.showLoading(),allowOutsideClick:false});try{await load('own');renderManager();}catch(e){Swal.fire('ผิดพลาด',e.message,'error')}}
   function renderManager(){Swal.fire({html:tableHtml(),showConfirmButton:false,showCloseButton:true,width:'96vw',customClass:{popup:'news-manager-popup'},didOpen:bindManager});}
-  function bindManager(){const root=Swal.getPopup();root.querySelector('#newsManagerAdd').onclick=()=>openEditor();root.querySelector('#newsManagerMode').onchange=async e=>{try{mode=await api('mode',{value:e.target.checked?'block':'none'});document.dispatchEvent(new Event('news-admin-updated'));renderManager()}catch(err){Swal.fire('ผิดพลาด',err.message,'error')}};root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEditor(items.find(i=>i.rowNumber===Number(b.dataset.edit))));root.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>removeNews(Number(b.dataset.delete)));root.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>moveNews(Number(b.dataset.row),b.dataset.move));root.querySelectorAll('[data-image]').forEach(img=>img.onclick=()=>Swal.fire({imageUrl:img.dataset.image,showConfirmButton:false,showCloseButton:true,width:900}));}
+  function bindManager(){
+    const root=Swal.getPopup();
+    const sourceToggle=root.querySelector('#newsManagerSource');
+    if(sourceToggle) sourceToggle.onchange=async e=>{
+      const next=e.target.checked?'admin':'own';
+      try{
+        Swal.showLoading();
+        await load(next);
+        renderManager();
+      }catch(err){Swal.fire('ผิดพลาด',err.message,'error')}
+    };
+    if(source==='admin'){
+      root.querySelectorAll('[data-image]').forEach(img=>img.onclick=()=>Swal.fire({imageUrl:img.dataset.image,showConfirmButton:false,showCloseButton:true,width:900}));
+      return;
+    }
+    const add=root.querySelector('#newsManagerAdd');
+    if(add) add.onclick=()=>openEditor();
+    const modeToggle=root.querySelector('#newsManagerMode');
+    if(modeToggle) modeToggle.onchange=async e=>{try{mode=await api('mode',{value:e.target.checked?'block':'none'});document.dispatchEvent(new Event('news-admin-updated'));renderManager()}catch(err){Swal.fire('ผิดพลาด',err.message,'error')}};
+    root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEditor(items.find(i=>i.rowNumber===Number(b.dataset.edit))));
+    root.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>removeNews(Number(b.dataset.delete)));
+    root.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>moveNews(Number(b.dataset.row),b.dataset.move));
+    root.querySelectorAll('[data-image]').forEach(img=>img.onclick=()=>Swal.fire({imageUrl:img.dataset.image,showConfirmButton:false,showCloseButton:true,width:900}));
+  }
   async function openEditor(item={}){
     let upload=null;
     const html=`<div class="news-editor-grid"><div class="news-editor-preview"><h3 id="newsPreviewTitle">${esc(item.title||'หัวข้อหลัก')}</h3><img id="newsPreviewImage" src="${esc(item.imageUrl||'')}" alt="ตัวอย่างรูปข่าว"><p id="newsPreviewDetail">${esc(item.detail||'รายละเอียดโดยย่อ')}</p></div><div class="news-editor-form"><label>หัวข้อหลัก</label><input id="newsTitle" value="${esc(item.title||'')}"><label>URL รูปภาพโปสเตอร์ข่าว หรืออัปโหลดรูป</label><div class="news-image-source-row"><input id="newsImage" type="url" placeholder="https://..." value="${esc(item.imageUrl||'')}"><label class="news-image-upload-btn" for="newsImageFile"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i> อัปโหลดรูป</label><input id="newsImageFile" class="news-image-file" type="file" accept="image/*"></div><small id="newsImageUploadStatus" class="news-image-upload-status">เลือกใส่ URL หรืออัปโหลดรูปจากเครื่อง ระบบจะย่อเป็น JPG ไม่เกิน 250 KB ก่อนบันทึก</small><label>รายละเอียดโดยย่อ</label><textarea id="newsDetail">${esc(item.detail||'')}</textarea><label>URL กดดูรายละเอียด (เว้นว่างได้)</label><input id="newsUrl" type="url" placeholder="https://... (ไม่บังคับ)" value="${esc(item.detailUrl||'')}"></div></div>`;

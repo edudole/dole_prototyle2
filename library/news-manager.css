@@ -39,3 +39,21 @@
 .news-image-upload-status{display:block;margin-top:6px;color:#64748b;font-size:12px;line-height:1.45}
 .news-image-upload-status.is-ready{color:#15803d;font-weight:600}.news-image-upload-status.is-error{color:#dc2626;font-weight:600}
 @media(max-width:520px){.news-image-source-row{grid-template-columns:1fr}.news-image-upload-btn{width:100%}}
+
+
+/* News source switch: own website / central admin */
+.news-manager-source-wrap{display:flex;align-items:center;justify-content:center;margin-left:auto}
+.news-source-switch{display:flex;align-items:center;gap:9px;padding:5px 8px;border:1px solid #dbe2ea;border-radius:999px;background:#fff;color:#64748b;font-weight:700;cursor:pointer;user-select:none}
+.news-source-switch input{position:absolute;opacity:0;pointer-events:none}
+.news-source-switch .slide-slider{width:54px;height:28px;flex-basis:54px}
+.news-source-switch .slide-slider::before{width:22px;height:22px}
+.news-source-switch input:checked + .slide-slider::before{transform:translateX(26px)}
+.news-source-option{font-size:13px;white-space:nowrap;transition:color .2s,font-weight .2s}
+.news-source-option.is-active{color:#0f172a;font-weight:800}
+.news-source-note{padding:8px 18px;background:#ecfdf5;border-bottom:1px solid #bbf7d0;color:#166534;font-size:13px;font-weight:600}
+.news-source-note.is-admin{background:#eff6ff;border-bottom-color:#bfdbfe;color:#1d4ed8}
+.news-manager-switch.is-disabled{opacity:.55;cursor:not-allowed}
+.news-readonly-order{display:inline-flex;min-width:30px;height:30px;align-items:center;justify-content:center;border-radius:7px;background:#e2e8f0;color:#475569;font-weight:700}
+.news-readonly-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#e2e8f0;color:#475569;font-size:12px;font-weight:700;white-space:nowrap}
+@media(max-width:900px){.news-manager-toolbar{flex-wrap:wrap}.news-manager-source-wrap{order:3;width:100%;margin-left:0;justify-content:flex-start}.news-source-switch{max-width:100%;flex-wrap:wrap}}
+@media(max-width:520px){.news-source-switch{width:100%;justify-content:space-between}.news-source-option{font-size:12px}}
