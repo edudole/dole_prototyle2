@@ -1,0 +1,17 @@
+POPUP USER (เพิ่มเติมจาก Popup Admin เดิม)
+
+เว็บไซต์ตำบล
+- แหล่งข้อมูล: DATABSE_MAIN_TEATHER_ID > popup_home!B2:G2
+
+เว็บไซต์ห้องสมุด
+- แหล่งข้อมูล: WEBSITE_SPREADSHEET_ID > popup_admin!B2:G2
+
+B2 = block แสดง / none ไม่แสดง
+C2 = ข้อความ
+D2 = URL รูป
+E2 = URL ปุ่ม รายละเอียด
+F2 = สีพื้นหลัง
+G2 = สีข้อความ
+
+หน้าเว็บหน่วงอย่างน้อย 6 วินาทีก่อน Popup User แสดง
+ถ้า Popup Admin ยังเปิดอยู่ ระบบจะรอให้ปิดก่อนเพื่อไม่ให้ Popup ซ้อนกัน
