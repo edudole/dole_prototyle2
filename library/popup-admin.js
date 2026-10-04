@@ -53,7 +53,7 @@
     if (root) root.remove();
     root = document.createElement('div');
     root.id = 'lp360PopupAdmin';
-    root.className = 'lp360-popup-admin swal2-container swal2-center swal2-backdrop-show';
+    root.className = 'lp360-popup-admin';
     root.setAttribute('aria-hidden', 'false');
 
     const dialog = document.createElement('div');
@@ -103,6 +103,8 @@
     root.style.setProperty('width', '100vw', 'important');
     root.style.setProperty('height', '100dvh', 'important');
     root.style.setProperty('display', 'grid', 'important');
+    root.style.setProperty('grid-template-columns', 'minmax(0, 1fr)', 'important');
+    root.style.setProperty('grid-template-rows', 'minmax(0, 1fr)', 'important');
     root.style.setProperty('place-items', 'center', 'important');
     root.style.setProperty('align-items', 'center', 'important');
     root.style.setProperty('justify-items', 'center', 'important');
@@ -111,6 +113,8 @@
     dialog.style.setProperty('margin', 'auto', 'important');
     dialog.style.setProperty('align-self', 'center', 'important');
     dialog.style.setProperty('justify-self', 'center', 'important');
+    dialog.style.setProperty('grid-column', '1', 'important');
+    dialog.style.setProperty('grid-row', '1', 'important');
 
     document.body.appendChild(root);
     document.documentElement.classList.add('lp360-popup-admin-open');
