@@ -1,0 +1,13 @@
+POPUP ADMIN (ทุกเว็บไซต์)
+
+แหล่งข้อมูล: DATABSE_MAIN_ID > ชีต popup_admin > แถว 2
+B2 = block / none
+C2 = ข้อความหัว popup
+D2 = URL รูปภาพ
+E2 = URL ปุ่มรายละเอียด
+F2 = สีพื้นหลัง popup
+G2 = สีข้อความ
+
+Frontend ที่แก้: index.html + popup-admin.css + popup-admin.js ของ root/tambon1/tambon2/tambon3/library
+Apps Script: ใช้ไฟล์ล่าสุดของแต่ละระบบและเพิ่ม mode=popupadmin เท่านั้น
+หลังอัปเดต Apps Script ให้ Deploy > Manage deployments > Edit > New version > Deploy

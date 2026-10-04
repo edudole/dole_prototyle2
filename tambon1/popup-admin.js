@@ -1,95 +1,101 @@
+/* LP360 popup_admin - public display on index.html only */
 (() => {
   'use strict';
+  const cfg = window.APP_CONFIG || {};
+  const execUrl = String(cfg.MAIN_EXEC_URL || cfg.EXEC_URL || '').trim();
+  if (!execUrl) return;
 
-  const getApiUrl = () => {
-    const cfg = window.APP_CONFIG || {};
-    return String(cfg.EXEC_URL || cfg.API_URL || cfg.MAIN_EXEC_URL || '').trim();
-  };
-
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[ch]));
-
-  const safeColor = (value, fallback) => {
-    const v = String(value || '').trim();
-    return /^#[0-9a-f]{3,8}$/i.test(v) || /^(rgb|hsl)a?\(/i.test(v) || /^[a-z]+$/i.test(v) ? v : fallback;
-  };
-
-  async function loadPopupAdmin() {
-    const api = getApiUrl();
-    if (!api) return null;
-    const joiner = api.includes('?') ? '&' : '?';
-    const response = await fetch(api + joiner + 'mode=popupadmin&_=' + Date.now(), {
-      method: 'GET',
-      cache: 'no-store'
+  function jsonp(baseUrl, params) {
+    return new Promise((resolve, reject) => {
+      const cb = '__lp360PopupAdmin_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      const script = document.createElement('script');
+      const timer = setTimeout(() => done(false, new Error('timeout')), 15000);
+      function done(ok, value) {
+        clearTimeout(timer);
+        try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+        ok ? resolve(value) : reject(value);
+      }
+      window[cb] = payload => done(true, payload);
+      const u = new URL(baseUrl);
+      Object.entries(params || {}).forEach(([k,v]) => u.searchParams.set(k, v));
+      u.searchParams.set('callback', cb);
+      u.searchParams.set('_', Date.now());
+      script.src = u.toString();
+      script.async = true;
+      script.onerror = () => done(false, new Error('network'));
+      document.head.appendChild(script);
     });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const payload = await response.json();
-    if (payload && payload.success === false) throw new Error(payload.message || 'โหลด popup_admin ไม่สำเร็จ');
-    return payload && payload.data ? payload.data : payload;
   }
 
-  async function showPopupAdmin() {
-    try {
-      const data = await loadPopupAdmin();
-      if (!data || String(data.mode || '').toLowerCase() !== 'block') return;
+  function cleanColor(value, fallback) {
+    const v = String(value || '').trim();
+    return /^#[0-9a-f]{3,8}$/i.test(v) || /^(rgb|hsl)a?\(/i.test(v) ? v : fallback;
+  }
 
-      const message = String(data.message || '').trim();
-      const imageUrl = String(data.imageUrl || '').trim();
-      const detailUrl = String(data.detailUrl || '').trim();
-      if (!message && !imageUrl && !detailUrl) return;
+  function closePopup(root) {
+    if (!root) return;
+    root.hidden = true;
+    root.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('lp360-popup-admin-open');
+  }
 
-      const background = safeColor(data.backgroundColor, '#ffffff');
-      const textColor = safeColor(data.textColor, '#000000');
+  function render(data) {
+    data = data || {};
+    if (String(data.mode || '').trim().toLowerCase() !== 'block') return;
+    const title = String(data.text || '').trim();
+    const imageUrl = String(data.imageUrl || '').trim();
+    const detailUrl = String(data.detailUrl || '').trim();
+    if (!title && !imageUrl && !detailUrl) return;
 
-      let html = '<div class="lp360-popup-admin-content">';
-      if (imageUrl) {
-        html += '<img class="lp360-popup-admin-image" src="' + esc(imageUrl) + '" alt="" loading="eager">';
-      }
-      html += '</div>';
+    let root = document.getElementById('lp360PopupAdmin');
+    if (root) root.remove();
+    root = document.createElement('div');
+    root.id = 'lp360PopupAdmin';
+    root.className = 'lp360-popup-admin swal2-container swal2-center swal2-backdrop-show';
+    root.setAttribute('aria-hidden', 'false');
 
-      if (window.Swal && typeof Swal.fire === 'function') {
-        await Swal.fire({
-          title: message || undefined,
-          html,
-          width: 'min(620px, 94vw)',
-          background,
-          color: textColor,
-          showCloseButton: true,
-          showConfirmButton: !!detailUrl,
-          confirmButtonText: 'รายละเอียด',
-          confirmButtonColor: '#ff7258',
-          allowOutsideClick: true,
-          customClass: {
-            popup: 'lp360-popup-admin',
-            title: 'lp360-popup-admin-title',
-            htmlContainer: 'lp360-popup-admin-html',
-            confirmButton: 'lp360-popup-admin-detail'
-          },
-          didOpen: popup => {
-            popup.style.setProperty('--lp360-popup-admin-text', textColor);
-            const title = popup.querySelector('.swal2-title');
-            if (title) title.style.color = textColor;
-          }
-        }).then(result => {
-          if (result.isConfirmed && detailUrl) {
-            window.open(detailUrl, '_blank', 'noopener,noreferrer');
-          }
-        });
-      }
-    } catch (error) {
-      console.warn('popup_admin:', error);
+    const dialog = document.createElement('div');
+    dialog.className = 'lp360-popup-admin__dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.style.background = cleanColor(data.backgroundColor, '#ffffff');
+    dialog.style.color = cleanColor(data.textColor, '#263238');
+
+    const close = document.createElement('button');
+    close.type = 'button'; close.className = 'lp360-popup-admin__close'; close.setAttribute('aria-label','ปิด'); close.textContent = '×';
+    close.addEventListener('click', () => closePopup(root));
+    dialog.appendChild(close);
+
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'lp360-popup-admin__title';
+      h.textContent = title;
+      h.style.color = cleanColor(data.textColor, '#263238');
+      dialog.appendChild(h);
     }
+    if (imageUrl) {
+      const wrap = document.createElement('div'); wrap.className='lp360-popup-admin__image-wrap';
+      const img = document.createElement('img'); img.className='lp360-popup-admin__image'; img.src=imageUrl; img.alt=title || 'ประชาสัมพันธ์';
+      wrap.appendChild(img); dialog.appendChild(wrap);
+    }
+    if (detailUrl) {
+      const actions = document.createElement('div'); actions.className='lp360-popup-admin__actions';
+      const a = document.createElement('a'); a.className='lp360-popup-admin__detail'; a.href=detailUrl; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent='รายละเอียด';
+      actions.appendChild(a); dialog.appendChild(actions);
+    }
+    root.appendChild(dialog);
+    root.addEventListener('click', e => { if (e.target === root) closePopup(root); });
+    document.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ closePopup(root); document.removeEventListener('keydown',esc); }});
+    document.body.appendChild(root);
+    document.body.classList.add('lp360-popup-admin-open');
   }
 
   function start() {
-    // ให้ popup หลักของหน้าเว็บโหลดก่อนเล็กน้อย แล้วจึงแสดง popup_admin ตรงกลางจอ
-    setTimeout(showPopupAdmin, 450);
+    jsonp(execUrl, { mode: 'popupadmin' })
+      .then(res => { if (res && res.success !== false) render(res.data || res); })
+      .catch(() => {});
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
-  } else {
-    start();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
+  else start();
 })();
