@@ -37,6 +37,7 @@
     if (!root) return;
     root.hidden = true;
     root.setAttribute('aria-hidden', 'true');
+    document.documentElement.classList.remove('lp360-popup-admin-open');
     document.body.classList.remove('lp360-popup-admin-open');
   }
 
@@ -87,7 +88,27 @@
     root.appendChild(dialog);
     root.addEventListener('click', e => { if (e.target === root) closePopup(root); });
     document.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ closePopup(root); document.removeEventListener('keydown',esc); }});
+    // Force a true viewport-centered overlay even if site/SweetAlert CSS tries to override it.
+    root.style.setProperty('position', 'fixed', 'important');
+    root.style.setProperty('inset', '0', 'important');
+    root.style.setProperty('top', '0', 'important');
+    root.style.setProperty('right', '0', 'important');
+    root.style.setProperty('bottom', '0', 'important');
+    root.style.setProperty('left', '0', 'important');
+    root.style.setProperty('width', '100vw', 'important');
+    root.style.setProperty('height', '100dvh', 'important');
+    root.style.setProperty('display', 'grid', 'important');
+    root.style.setProperty('place-items', 'center', 'important');
+    root.style.setProperty('align-items', 'center', 'important');
+    root.style.setProperty('justify-items', 'center', 'important');
+    root.style.setProperty('margin', '0', 'important');
+    root.style.setProperty('z-index', '2147483646', 'important');
+    dialog.style.setProperty('margin', 'auto', 'important');
+    dialog.style.setProperty('align-self', 'center', 'important');
+    dialog.style.setProperty('justify-self', 'center', 'important');
+
     document.body.appendChild(root);
+    document.documentElement.classList.add('lp360-popup-admin-open');
     document.body.classList.add('lp360-popup-admin-open');
   }
 
