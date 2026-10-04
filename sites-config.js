@@ -40,7 +40,7 @@
       SEO_TITLE: "เว็บไซต์ ศกร.ระดับตำบล 2",
       SEO_DESCRIPTION: "เว็บไซต์ศูนย์การเรียนรู้ระดับตำบล",
       MAIN_EXEC_URL: 'https://script.google.com/macros/s/AKfycbyXrG7HZVrpflXKo-rr4jf2Ez79NqWpSEgh6bBD0OXSrk5oX9_SWl4CatDBFX5gS8c-RA/exec',
-      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycbzdAKhonGUj6_kCjxqaFC-C-ZpDWx1BDNLYB5Rr_PdnNgeNYshkUTu9dL7LP24Uu1PQlg/exec',
+      STUDENT_PROFILE_EXEC_URL: 'https://script.google.com/macros/s/AKfycby6Djhw21tB-lHRdJUT5ZO6yDL-Ha6-cdzglEQ9TW6N_7Teyr1_xp4Ic07g8Ja2rh-Y/exec',
       CACHE_PREFIX: 'LP360:TAMBOL:TAMBON2:'
     }),
     tambon3: Object.freeze({
