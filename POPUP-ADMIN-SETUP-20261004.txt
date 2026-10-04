@@ -1,0 +1,12 @@
+POPUP_ADMIN update 2026-10-04
+
+ทุกเว็บไซต์อ่าน popup จาก DATABSE_MAIN_ID > popup_admin แถว 2
+B2 block/none
+C2 ข้อความ
+D2 URL รูป
+E2 URL รายละเอียด
+F2 สีพื้นหลัง popup
+G2 สีข้อความ
+
+ไฟล์ Frontend ที่เพิ่มทุกเว็บไซต์: popup-admin.js, popup-admin.css และ index.html อ้างอิงไฟล์ดังกล่าว
+Apps Script มีการแก้ไขในรอบนี้ จึงรวมไฟล์ล่าสุดสำหรับอำเภอ/ตำบล/ห้องสมุดไว้ใน AppsScript/
