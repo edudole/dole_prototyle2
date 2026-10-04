@@ -91,10 +91,14 @@
     document.body.classList.add('lp360-popup-admin-open');
   }
 
+  const POPUP_DELAY_MS = 5000;
+
   function start() {
-    jsonp(execUrl, { mode: 'popupadmin' })
-      .then(res => { if (res && res.success !== false) render(res.data || res); })
-      .catch(() => {});
+    window.setTimeout(() => {
+      jsonp(execUrl, { mode: 'popupadmin' })
+        .then(res => { if (res && res.success !== false) render(res.data || res); })
+        .catch(() => {});
+    }, POPUP_DELAY_MS);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
   else start();
