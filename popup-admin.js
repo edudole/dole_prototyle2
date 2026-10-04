@@ -68,6 +68,11 @@
     close.addEventListener('click', () => closePopup(root));
     dialog.appendChild(close);
 
+    const adminLabel = document.createElement('div');
+    adminLabel.className = 'lp360-popup-admin__admin-label';
+    adminLabel.textContent = 'ข้อความจาก Admin';
+    dialog.appendChild(adminLabel);
+
     if (title) {
       const h = document.createElement('div');
       h.className = 'lp360-popup-admin__title';

@@ -59,3 +59,23 @@ html.lp360-popup-admin-open,body.lp360-popup-admin-open{overflow:hidden!importan
   .lp360-popup-admin__image{max-height:56vh;max-height:56dvh}
   .lp360-popup-admin__close{right:7px;top:7px;width:38px;height:38px;font-size:29px;line-height:36px}
 }
+
+.lp360-popup-admin__admin-label {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 400;
+  letter-spacing: .01em;
+  opacity: .58;
+  margin: 0 0 8px;
+  padding: 0 34px;
+}
+
+@media (max-width: 640px) {
+  .lp360-popup-admin__admin-label {
+    font-size: 10px;
+    margin-bottom: 7px;
+  }
+}
