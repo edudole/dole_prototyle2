@@ -35,10 +35,15 @@
 
   function closePopup(root) {
     if (!root) return;
-    root.hidden = true;
     root.setAttribute('aria-hidden', 'true');
+    // The overlay is forced to display:grid!important for true viewport centering.
+    // Therefore the HTML hidden attribute alone cannot override it.
+    root.style.setProperty('display', 'none', 'important');
     document.documentElement.classList.remove('lp360-popup-admin-open');
     document.body.classList.remove('lp360-popup-admin-open');
+    window.setTimeout(() => {
+      if (root && root.parentNode) root.parentNode.removeChild(root);
+    }, 0);
   }
 
   function render(data) {
