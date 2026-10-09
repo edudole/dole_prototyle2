@@ -6,7 +6,7 @@
     window.APP_CONFIG.EXEC_URL;
 
   const LEVELS = ['ประถม', 'ม.ต้น', 'ม.ปลาย'];
-  const CACHE_KEY = 'LP360:DISTRICT:studentServiceTop3:v8-top3-heading-org';
+  const CACHE_KEY = 'LP360:DISTRICT:studentServiceTop3:v9-quiz-avg-score-all';
   const CACHE_AGE = 5 * 60 * 1000;
   const AUTO_ROTATE_DELAY = 4000;
   let rankingData = null;
@@ -54,7 +54,7 @@
     } catch (_) {}
   }
 
-  function renderPerson(row, rank, position) {
+  function renderPerson(row, rank, position, type) {
     if (!row) {
       return `<div class="student-service-podium-person is-empty ${position}" aria-hidden="true"></div>`;
     }
@@ -62,7 +62,10 @@
     const fullName = String(row.fullName || row.teacher || '').trim();
     const displayName = String(row.displayName || '').trim() || displayFirstName(fullName);
     const photoUrl = String(row.photoUrl || '').trim();
-    const percent = Number(row.percent || 0).toFixed(2);
+    const avgScoreNumber = Number(row.avgScore);
+    const valueText = type === 'quiz'
+      ? (Number.isFinite(avgScoreNumber) ? avgScoreNumber.toFixed(1) : '—')
+      : `${Number(row.percent || 0).toFixed(2)}%`;
     const photo = photoUrl
       ? `<img class="student-service-podium-photo" src="${escapeHtml(photoUrl)}" alt="รูป ${escapeHtml(fullName || displayName)}" loading="lazy" decoding="async"><span class="student-service-podium-fallback" hidden aria-hidden="true"><i class="fa-solid fa-user"></i></span>`
       : `<span class="student-service-podium-fallback" aria-hidden="true"><i class="fa-solid fa-user"></i></span>`;
@@ -74,7 +77,7 @@
           <div class="student-service-podium-avatar">${photo}</div>
         </div>
         <div class="student-service-podium-name">${escapeHtml(displayName)}</div>
-        <div class="student-service-podium-percent">${percent}%</div>
+        <div class="student-service-podium-percent">${valueText}</div>
       </div>
     `;
   }
@@ -107,9 +110,9 @@
     ranking.innerHTML = `
       <div class="student-service-slide-level">${escapeHtml(level)}</div>
       <div class="student-service-podium" aria-label="3 ลำดับสูงสุด ระดับ ${escapeHtml(level)}">
-        ${renderPerson(rank2, 2, 'podium-left')}
-        ${renderPerson(rank1, 1, 'podium-center')}
-        ${renderPerson(rank3, 3, 'podium-right')}
+        ${renderPerson(rank2, 2, 'podium-left', type)}
+        ${renderPerson(rank1, 1, 'podium-center', type)}
+        ${renderPerson(rank3, 3, 'podium-right', type)}
       </div>
     `;
   }
@@ -195,19 +198,29 @@
         result = await window.SiteFast.fetchMode(
           'studentServiceTop3',
           {},
-          { key: 'studentServiceTop3:v8-top3-heading-org', ttl: CACHE_AGE }
+          { key: 'studentServiceTop3:v9-quiz-avg-score-all', ttl: CACHE_AGE }
         );
       } else {
         const separator = STUDENT_SERVICE_API_URL.includes('?') ? '&' : '?';
         const response = await fetch(
           `${STUDENT_SERVICE_API_URL}${separator}mode=studentServiceTop3`,
-          { method: 'GET', cache: 'default' }
+          { method: 'GET', cache: 'no-store' }
         );
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         result = await response.json();
       }
       if (!result || (!result.worksheet && !result.quiz)) {
         throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
+      }
+
+      const quizRows = LEVELS.flatMap(level =>
+        result.quiz && Array.isArray(result.quiz[level]) ? result.quiz[level] : []
+      );
+      const missingAvgScore = quizRows.some(row =>
+        row && !Object.prototype.hasOwnProperty.call(row, 'avgScore')
+      );
+      if (missingAvgScore) {
+        throw new Error('Apps Script อำเภอยังไม่ส่ง avgScore กรุณา Deploy เวอร์ชันใหม่');
       }
 
       rankingData = result;
