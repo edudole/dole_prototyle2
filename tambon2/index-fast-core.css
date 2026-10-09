@@ -5203,3 +5203,10 @@ body:not(.admin-edit-mode) .boss-carousel .boss-box-toolbar { display:none; }
     letter-spacing:.03em;
   }
 }
+
+/* ===== STUDENT SERVICE LOGIN TEXT: BLACK ===== */
+.student-service-exam .student-service-open,
+.student-service-classroom .student-service-open{
+  color:#000000 !important;
+}
+
