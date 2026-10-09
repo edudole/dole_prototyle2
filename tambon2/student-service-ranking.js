@@ -6,7 +6,7 @@
     window.APP_CONFIG.API_URL;
 
   const LEVELS = ['ประถม', 'ม.ต้น', 'ม.ปลาย'];
-  const CACHE_KEY = 'LP360:TAMBOL:studentServiceTop3:v9-quiz-avg-score-force';
+  const CACHE_KEY = 'LP360:TAMBOL:studentServiceTop3:v10-quiz-avg-score-exact';
   const CACHE_AGE = 5 * 60 * 1000;
   const AUTO_ROTATE_DELAY = 4000;
   let rankingData = null;
@@ -37,21 +37,6 @@
     return parts.slice(0, -1).join(' ');
   }
 
-  function clearLegacyRankingCaches() {
-    try {
-      const legacyKeys = [
-        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v7-top3-heading-org',
-        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v8-quiz-avg-score',
-        'studentServiceTop3:v7-top3-heading-org',
-        'studentServiceTop3:v8-quiz-avg-score'
-      ];
-      legacyKeys.forEach(key => {
-        sessionStorage.removeItem(key);
-        localStorage.removeItem(key);
-      });
-    } catch (_) {}
-  }
-
   function readCache() {
     try {
       const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
@@ -77,8 +62,9 @@
     const fullName = String(row.fullName || row.teacher || '').trim();
     const displayName = String(row.displayName || '').trim() || displayFirstName(fullName);
     const photoUrl = String(row.photoUrl || '').trim();
+    const avgScoreNumber = Number(row.avgScore);
     const valueText = type === 'quiz'
-      ? Number(row.avgScore || 0).toFixed(1)
+      ? (Number.isFinite(avgScoreNumber) ? avgScoreNumber.toFixed(1) : '—')
       : `${Number(row.percent || 0).toFixed(2)}%`;
     const photo = photoUrl
       ? `<img class="student-service-podium-photo" src="${escapeHtml(photoUrl)}" alt="รูป ${escapeHtml(fullName || displayName)}" loading="lazy" decoding="async"><span class="student-service-podium-fallback" hidden aria-hidden="true"><i class="fa-solid fa-user"></i></span>`
@@ -193,7 +179,20 @@
   }
 
   async function loadRankings() {
-    clearLegacyRankingCaches();
+    try {
+      [
+        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v7-top3-heading-org',
+        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v8-quiz-avg-score',
+        'LP360:TAMBOL:studentServiceTop3:v9-quiz-avg-score-force'
+      ].forEach(function(key) {
+        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
+      });
+      if (window.SiteFast && typeof window.SiteFast.clear === 'function') {
+        window.SiteFast.clear('studentServiceTop3');
+      }
+    } catch (_) {}
+
     rankingData = readCache();
     if (rankingData) {
       activeLevelIndex = 0;
@@ -208,24 +207,35 @@
     }
 
     try {
-      let result;
-      if (window.SiteFast) {
-        result = await window.SiteFast.fetchMode(
-          'studentServiceTop3',
-          {},
-          { key: 'studentServiceTop3:v9-quiz-avg-score-force', ttl: CACHE_AGE }
-        );
-      } else {
-        const separator = STUDENT_SERVICE_API_URL.includes('?') ? '&' : '?';
-        const response = await fetch(
-          `${STUDENT_SERVICE_API_URL}${separator}mode=studentServiceTop3&v=9`,
-          { method: 'GET', cache: 'no-store' }
-        );
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        result = await response.json();
-      }
+      // Ranking นี้เรียก endpoint ใหม่โดยตรง เพื่อไม่ปะปนกับ cache รุ่น percent เดิม
+      const separator = STUDENT_SERVICE_API_URL.includes('?') ? '&' : '?';
+      const freshToken = Date.now();
+      const response = await fetch(
+        `${STUDENT_SERVICE_API_URL}${separator}mode=studentServiceTop3Avg&fresh=${freshToken}`,
+        {
+          method: 'GET',
+          cache: 'no-store',
+          credentials: 'omit'
+        }
+      );
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+
       if (!result || (!result.worksheet && !result.quiz)) {
-        throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
+        throw new Error('รูปแบบข้อมูลอันดับไม่ถูกต้อง');
+      }
+
+      // ป้องกันกรณี Web App ยังเป็น deployment เก่าที่ไม่ส่ง avgScore
+      const quizLevels = LEVELS.flatMap(level =>
+        result.quiz && Array.isArray(result.quiz[level]) ? result.quiz[level] : []
+      );
+      const quizRowsMissingAvg = quizLevels.some(row =>
+        row && !Object.prototype.hasOwnProperty.call(row, 'avgScore')
+      );
+
+      if (quizRowsMissingAvg) {
+        throw new Error('Apps Script ที่ใช้อยู่ยังไม่ใช่เวอร์ชันคะแนนเฉลี่ย กรุณา Deploy เวอร์ชันใหม่');
       }
 
       rankingData = result;
