@@ -6,7 +6,7 @@
     window.APP_CONFIG.API_URL;
 
   const LEVELS = ['ประถม', 'ม.ต้น', 'ม.ปลาย'];
-  const CACHE_KEY = 'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v8-quiz-avg-score';
+  const CACHE_KEY = 'LP360:TAMBOL:studentServiceTop3:v9-quiz-avg-score-force';
   const CACHE_AGE = 5 * 60 * 1000;
   const AUTO_ROTATE_DELAY = 4000;
   let rankingData = null;
@@ -35,6 +35,21 @@
     }
 
     return parts.slice(0, -1).join(' ');
+  }
+
+  function clearLegacyRankingCaches() {
+    try {
+      const legacyKeys = [
+        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v7-top3-heading-org',
+        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v8-quiz-avg-score',
+        'studentServiceTop3:v7-top3-heading-org',
+        'studentServiceTop3:v8-quiz-avg-score'
+      ];
+      legacyKeys.forEach(key => {
+        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
+      });
+    } catch (_) {}
   }
 
   function readCache() {
@@ -178,6 +193,7 @@
   }
 
   async function loadRankings() {
+    clearLegacyRankingCaches();
     rankingData = readCache();
     if (rankingData) {
       activeLevelIndex = 0;
@@ -197,13 +213,13 @@
         result = await window.SiteFast.fetchMode(
           'studentServiceTop3',
           {},
-          { key: 'studentServiceTop3:v7-top3-heading-org', ttl: CACHE_AGE }
+          { key: 'studentServiceTop3:v9-quiz-avg-score-force', ttl: CACHE_AGE }
         );
       } else {
         const separator = STUDENT_SERVICE_API_URL.includes('?') ? '&' : '?';
         const response = await fetch(
-          `${STUDENT_SERVICE_API_URL}${separator}mode=studentServiceTop3`,
-          { method: 'GET', cache: 'default' }
+          `${STUDENT_SERVICE_API_URL}${separator}mode=studentServiceTop3&v=9`,
+          { method: 'GET', cache: 'no-store' }
         );
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         result = await response.json();
