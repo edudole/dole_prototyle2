@@ -6,7 +6,7 @@
     window.APP_CONFIG.API_URL;
 
   const LEVELS = ['ประถม', 'ม.ต้น', 'ม.ปลาย'];
-  const CACHE_KEY = 'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v7-top3-heading-org';
+  const CACHE_KEY = 'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v8-quiz-avg-score';
   const CACHE_AGE = 5 * 60 * 1000;
   const AUTO_ROTATE_DELAY = 4000;
   let rankingData = null;
@@ -54,7 +54,7 @@
     } catch (_) {}
   }
 
-  function renderPerson(row, rank, position) {
+  function renderPerson(row, rank, position, type) {
     if (!row) {
       return `<div class="student-service-podium-person is-empty ${position}" aria-hidden="true"></div>`;
     }
@@ -62,7 +62,9 @@
     const fullName = String(row.fullName || row.teacher || '').trim();
     const displayName = String(row.displayName || '').trim() || displayFirstName(fullName);
     const photoUrl = String(row.photoUrl || '').trim();
-    const percent = Number(row.percent || 0).toFixed(2);
+    const valueText = type === 'quiz'
+      ? Number(row.avgScore || 0).toFixed(1)
+      : `${Number(row.percent || 0).toFixed(2)}%`;
     const photo = photoUrl
       ? `<img class="student-service-podium-photo" src="${escapeHtml(photoUrl)}" alt="รูป ${escapeHtml(fullName || displayName)}" loading="lazy" decoding="async"><span class="student-service-podium-fallback" hidden aria-hidden="true"><i class="fa-solid fa-user"></i></span>`
       : `<span class="student-service-podium-fallback" aria-hidden="true"><i class="fa-solid fa-user"></i></span>`;
@@ -74,7 +76,7 @@
           <div class="student-service-podium-avatar">${photo}</div>
         </div>
         <div class="student-service-podium-name">${escapeHtml(displayName)}</div>
-        <div class="student-service-podium-percent">${percent}%</div>
+        <div class="student-service-podium-percent">${valueText}</div>
       </div>
     `;
   }
@@ -107,9 +109,9 @@
     ranking.innerHTML = `
       <div class="student-service-slide-level">${escapeHtml(level)}</div>
       <div class="student-service-podium" aria-label="3 ลำดับสูงสุด ระดับ ${escapeHtml(level)}">
-        ${renderPerson(rank2, 2, 'podium-left')}
-        ${renderPerson(rank1, 1, 'podium-center')}
-        ${renderPerson(rank3, 3, 'podium-right')}
+        ${renderPerson(rank2, 2, 'podium-left', type)}
+        ${renderPerson(rank1, 1, 'podium-center', type)}
+        ${renderPerson(rank3, 3, 'podium-right', type)}
       </div>
     `;
   }
