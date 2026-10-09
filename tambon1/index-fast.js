@@ -2200,7 +2200,7 @@ window.STUDENT_PROFILE_WEB_APP_URL =
     window.APP_CONFIG.API_URL;
 
   const LEVELS = ['ประถม', 'ม.ต้น', 'ม.ปลาย'];
-  const CACHE_KEY = 'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v7-top3-heading-org';
+  const CACHE_KEY = 'LP360:TAMBOL:studentServiceTop3:v11-quiz-avg-score-active';
   const CACHE_AGE = 5 * 60 * 1000;
   const AUTO_ROTATE_DELAY = 4000;
   let rankingData = null;
@@ -2248,7 +2248,7 @@ window.STUDENT_PROFILE_WEB_APP_URL =
     } catch (_) {}
   }
 
-  function renderPerson(row, rank, position) {
+  function renderPerson(row, rank, position, type) {
     if (!row) {
       return `<div class="student-service-podium-person is-empty ${position}" aria-hidden="true"></div>`;
     }
@@ -2256,7 +2256,10 @@ window.STUDENT_PROFILE_WEB_APP_URL =
     const fullName = String(row.fullName || row.teacher || '').trim();
     const displayName = String(row.displayName || '').trim() || displayFirstName(fullName);
     const photoUrl = String(row.photoUrl || '').trim();
-    const percent = Number(row.percent || 0).toFixed(2);
+    const avgScoreNumber = Number(row.avgScore);
+    const valueText = type === 'quiz'
+      ? (Number.isFinite(avgScoreNumber) ? avgScoreNumber.toFixed(1) : '—')
+      : `${Number(row.percent || 0).toFixed(2)}%`;
     const photo = photoUrl
       ? `<img class="student-service-podium-photo" src="${escapeHtml(photoUrl)}" alt="รูป ${escapeHtml(fullName || displayName)}" loading="lazy" decoding="async"><span class="student-service-podium-fallback" hidden aria-hidden="true"><i class="fa-solid fa-user"></i></span>`
       : `<span class="student-service-podium-fallback" aria-hidden="true"><i class="fa-solid fa-user"></i></span>`;
@@ -2268,7 +2271,7 @@ window.STUDENT_PROFILE_WEB_APP_URL =
           <div class="student-service-podium-avatar">${photo}</div>
         </div>
         <div class="student-service-podium-name">${escapeHtml(displayName)}</div>
-        <div class="student-service-podium-percent">${percent}%</div>
+        <div class="student-service-podium-percent">${valueText}</div>
       </div>
     `;
   }
@@ -2301,9 +2304,9 @@ window.STUDENT_PROFILE_WEB_APP_URL =
     ranking.innerHTML = `
       <div class="student-service-slide-level">${escapeHtml(level)}</div>
       <div class="student-service-podium" aria-label="3 ลำดับสูงสุด ระดับ ${escapeHtml(level)}">
-        ${renderPerson(rank2, 2, 'podium-left')}
-        ${renderPerson(rank1, 1, 'podium-center')}
-        ${renderPerson(rank3, 3, 'podium-right')}
+        ${renderPerson(rank2, 2, 'podium-left', type)}
+        ${renderPerson(rank1, 1, 'podium-center', type)}
+        ${renderPerson(rank3, 3, 'podium-right', type)}
       </div>
     `;
   }
@@ -2370,6 +2373,18 @@ window.STUDENT_PROFILE_WEB_APP_URL =
   }
 
   async function loadRankings() {
+    try {
+      [
+        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v7-top3-heading-org',
+        'LP360:TAMBOL:BANG_RAK:studentServiceTop3:v8-quiz-avg-score',
+        'LP360:TAMBOL:studentServiceTop3:v9-quiz-avg-score-force',
+        'LP360:TAMBOL:studentServiceTop3:v10-quiz-avg-score-exact'
+      ].forEach(function(key) {
+        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
+      });
+    } catch (_) {}
+
     rankingData = readCache();
     if (rankingData) {
       activeLevelIndex = 0;
@@ -2384,24 +2399,26 @@ window.STUDENT_PROFILE_WEB_APP_URL =
     }
 
     try {
-      let result;
-      if (window.SiteFast) {
-        result = await window.SiteFast.fetchMode(
-          'studentServiceTop3',
-          {},
-          { key: 'studentServiceTop3:v7-top3-heading-org', ttl: CACHE_AGE }
-        );
-      } else {
-        const separator = STUDENT_SERVICE_API_URL.includes('?') ? '&' : '?';
-        const response = await fetch(
-          `${STUDENT_SERVICE_API_URL}${separator}mode=studentServiceTop3`,
-          { method: 'GET', cache: 'default' }
-        );
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        result = await response.json();
-      }
+      const separator = STUDENT_SERVICE_API_URL.includes('?') ? '&' : '?';
+      const response = await fetch(
+        `${STUDENT_SERVICE_API_URL}${separator}mode=studentServiceTop3Avg&fresh=${Date.now()}`,
+        { method: 'GET', cache: 'no-store', credentials: 'omit' }
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+
       if (!result || (!result.worksheet && !result.quiz)) {
-        throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
+        throw new Error('รูปแบบข้อมูลอันดับไม่ถูกต้อง');
+      }
+
+      const quizRows = LEVELS.flatMap(level =>
+        result.quiz && Array.isArray(result.quiz[level]) ? result.quiz[level] : []
+      );
+      const missingAvgScore = quizRows.some(row =>
+        row && !Object.prototype.hasOwnProperty.call(row, 'avgScore')
+      );
+      if (missingAvgScore) {
+        throw new Error('Apps Script ยังไม่ส่ง avgScore กรุณา Deploy เวอร์ชันใหม่');
       }
 
       rankingData = result;
